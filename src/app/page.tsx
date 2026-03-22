@@ -180,3 +180,9 @@ export default function GeneratorProDashboard() {
       </footer>
 
       <style jsx global>{`
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        body { background-color: #0f1115; }
+      `}</style>
+    </div>
+  );
+}
