@@ -1,16 +1,14 @@
 "use client";
 import React, { useState, useEffect, useMemo } from 'react';
 
-export default function RakbaFinalSystem() {
+export default function RakbaLivingParallax() {
   const [mounted, setMounted] = useState(false);
   const [stockBefore, setStockBefore] = useState('26820'); 
-  
   const [fuelRows, setFuelRows] = useState([
     { id: 1, name: 'CAT 1', yest: '', today: '' },
     { id: 2, name: 'CAT 2', yest: '', today: '' },
     { id: 3, name: 'CAT 3', yest: '', today: '' },
   ]);
-
   const [kwRows, setKwRows] = useState([
     { id: 1, name: 'CAT 1', yest: '', today: '' },
     { id: 2, name: 'CAT 2', yest: '', today: '' },
@@ -19,7 +17,7 @@ export default function RakbaFinalSystem() {
 
   useEffect(() => {
     setMounted(true);
-    const saved = localStorage.getItem('rakba_v_final_stable');
+    const saved = localStorage.getItem('rakba_parallax_v1');
     if (saved) {
       const parsed = JSON.parse(saved);
       if(parsed.s) setStockBefore(parsed.s);
@@ -29,9 +27,7 @@ export default function RakbaFinalSystem() {
   }, []);
 
   useEffect(() => {
-    if (mounted) {
-      localStorage.setItem('rakba_v_final_stable', JSON.stringify({ s: stockBefore, fr: fuelRows, kr: kwRows }));
-    }
+    if (mounted) localStorage.setItem('rakba_parallax_v1', JSON.stringify({ s: stockBefore, fr: fuelRows, kr: kwRows }));
   }, [stockBefore, fuelRows, kwRows, mounted]);
 
   const stats = useMemo(() => {
@@ -45,78 +41,120 @@ export default function RakbaFinalSystem() {
   if (!mounted) return null;
 
   return (
-    <div className="min-h-screen bg-[#0a0b10] text-white p-3 font-sans selection:bg-blue-500/30" dir="rtl">
+    <div className="min-h-screen bg-[#020408] text-white p-4 relative overflow-hidden font-sans" dir="rtl">
+      
+      {/* خلفية البارالاكس المتحركة (Parallax Background Shapes) */}
+      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/10 rounded-full blur-[120px] animate-pulse"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-emerald-600/10 rounded-full blur-[120px] animate-bounce duration-[10s]"></div>
+
       <style jsx global>{`
-        input { font-size: 16px !important; background: rgba(0,0,0,0.3) !important; border: 1px solid rgba(255,255,255,0.1) !important; border-radius: 12px !important; color: white !important; text-align: center !important; width: 100% !important; padding: 8px 0 !important; outline: none !important; }
-        input:focus { border-color: #3b82f6 !important; background: rgba(0,0,0,0.5) !important; }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 24px; padding: 15px; }
+        .glass-panel {
+          background: rgba(255, 255, 255, 0.03);
+          backdrop-filter: blur(15px);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .glass-panel:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 30px 60px -12px rgba(59, 130, 246, 0.2);
+          border-color: rgba(59, 130, 246, 0.3);
+        }
+        input {
+          background: rgba(0, 0, 0, 0.3) !important;
+          border: 1px solid rgba(255, 255, 255, 0.1) !important;
+          border-radius: 12px !important;
+          padding: 10px !important;
+          color: white !important;
+          text-align: center !important;
+          transition: all 0.3s ease !important;
+        }
+        input:focus {
+          border-color: #3b82f6 !important;
+          box-shadow: 0 0 15px rgba(59, 130, 246, 0.4) !important;
+          background: rgba(0, 0, 0, 0.6) !important;
+          outline: none !important;
+        }
+        .neon-text {
+          text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+        }
       `}</style>
 
-      <div className="max-w-md mx-auto space-y-4">
+      <div className="max-w-[500px] mx-auto relative z-10 space-y-6 pb-12">
         
-        {/* Header */}
-        <div className="flex justify-between items-center px-2">
-          <h1 className="text-2xl font-black italic text-blue-500">رُكبة PRO</h1>
+        {/* Header - مستوحى من Living Parallax */}
+        <header className="flex justify-between items-center py-4 border-b border-white/5">
+          <div>
+            <h1 className="text-3xl font-black tracking-tighter neon-text uppercase italic">
+              <span className="text-blue-500">Rakba</span> <span className="text-white">PRO</span>
+            </h1>
+            <p className="text-[9px] font-bold text-slate-500 tracking-[0.4em] uppercase">Enterprise Analytics</p>
+          </div>
           <button 
-            onClick={() => confirm("ترحيل؟") && (setFuelRows(fuelRows.map(r=>({...r, yest:r.today, today:''}))), setKwRows(kwRows.map(r=>({...r, yest:r.today, today:''}))))}
-            className="bg-blue-600 px-4 py-2 rounded-xl text-[10px] font-bold shadow-lg active:scale-95 transition-all"
+            onClick={() => confirm("ترحيل البيانات؟") && (setFuelRows(fuelRows.map(r=>({...r, yest:r.today, today:''}))), setKwRows(kwRows.map(r=>({...r, yest:r.today, today:''}))))}
+            className="bg-gradient-to-r from-blue-600 to-blue-400 px-5 py-2.5 rounded-2xl text-[10px] font-black shadow-xl active:scale-90 transition-all hover:brightness-110"
           >
-            ترحيل البيانات ⏭️
+            MIGRATE ⏭️
           </button>
-        </div>
+        </header>
 
-        {/* الكارت الزجاجي للمتبقي */}
-        <div className="glass text-center border-t border-white/10 shadow-2xl">
-          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">الخزين المتبقي (L)</p>
-          <h2 className="text-6xl font-black text-blue-400 tabular-nums my-2 tracking-tighter">
+        {/* الكارت الرئيسي (Living Card) */}
+        <section className="glass-panel p-8 rounded-[2.5rem] text-center relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-4 opacity-10">
+            <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          </div>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Net Remaining Fuel</p>
+          <div className="text-8xl font-black text-white tracking-tighter tabular-nums drop-shadow-2xl mb-6">
             {stats.current.toLocaleString()}
-          </h2>
-          <div className="mt-4 px-4">
-            <p className="text-[9px] text-blue-500 font-bold mb-1">الخزين قبل الصرف</p>
-            <input type="number" value={stockBefore} onChange={(e)=>setStockBefore(e.target.value)} />
+          </div>
+          <div className="max-w-[200px] mx-auto">
+            <label className="text-[9px] font-bold text-blue-400 block mb-1 uppercase">Initial Stock</label>
+            <input type="number" value={stockBefore} onChange={(e)=>setStockBefore(e.target.value)} className="w-full text-xl font-bold" />
+          </div>
+        </section>
+
+        {/* إحصائيات ملونة (Visual Metrics) */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="glass-panel p-5 rounded-[2rem] border-r-4 border-emerald-500">
+             <div className="text-emerald-500 text-[10px] font-black uppercase mb-1 tracking-tighter">Total Fuel Spent</div>
+             <div className="text-3xl font-black tabular-nums">{stats.totalFuel.toLocaleString()}</div>
+          </div>
+          <div className="glass-panel p-5 rounded-[2rem] border-r-4 border-blue-500">
+             <div className="text-blue-500 text-[10px] font-black uppercase mb-1 tracking-tighter">Total Power (KW)</div>
+             <div className="text-3xl font-black tabular-nums">{stats.totalKW.toLocaleString()}</div>
           </div>
         </div>
 
-        {/* الإجماليات */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="glass border-r-4 border-emerald-500 text-center">
-            <p className="text-[9px] text-emerald-500 font-bold uppercase mb-1">مجموع الكاز</p>
-            <p className="text-2xl font-black text-emerald-400 tabular-nums">{stats.totalFuel}</p>
-          </div>
-          <div className="glass border-r-4 border-yellow-500 text-center">
-            <p className="text-[9px] text-yellow-500 font-bold uppercase mb-1">مجموع الـ KW</p>
-            <p className="text-2xl font-black text-yellow-400 tabular-nums">{stats.totalKW}</p>
-          </div>
-        </div>
-
-        {/* جداول العدادات */}
+        {/* جداول البيانات التفاعلية */}
         <div className="space-y-6">
-          {/* جدول الكاز */}
+          {/* قسم الكاز */}
           <div className="space-y-3">
-            <h3 className="text-[10px] font-black text-gray-500 px-2 uppercase tracking-widest italic">⛽ عدادات الكاز</h3>
+            <h3 className="text-[10px] font-black text-slate-500 px-3 uppercase tracking-[0.3em]">⛽ Fuel Consumption</h3>
             {fuelRows.map((row, i) => (
-              <div key={row.id} className="glass flex items-center gap-2 py-2 px-3 hover:bg-white/5 transition-all">
-                <span className="text-[10px] font-bold w-12 text-blue-400">{row.name}</span>
-                <div className="flex-1"><input type="number" placeholder="أمس" value={row.yest} onChange={(e)=>{const n=[...fuelRows]; n[i].yest=e.target.value; setFuelRows(n)}} /></div>
-                <div className="flex-1"><input type="number" placeholder="اليوم" value={row.today} onChange={(e)=>{const n=[...fuelRows]; n[i].today=e.target.value; setFuelRows(n)}} /></div>
-                <span className="text-emerald-400 font-black w-12 text-center text-xl tabular-nums">{stats.fDiffs[i]}</span>
+              <div key={row.id} className="glass-panel p-4 rounded-3xl flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center font-black text-blue-400 italic text-xs border border-blue-500/20">{row.name.split(' ')[1]}</div>
+                <div className="flex-1"><input type="number" placeholder="Yest" value={row.yest} onChange={(e)=>{const n=[...fuelRows]; n[i].yest=e.target.value; setFuelRows(n)}} /></div>
+                <div className="flex-1"><input type="number" placeholder="Today" value={row.today} onChange={(e)=>{const n=[...fuelRows]; n[i].today=e.target.value; setFuelRows(n)}} className="border-emerald-500/30 !text-white font-bold" /></div>
+                <div className="w-14 text-center font-black text-2xl text-emerald-400 tabular-nums">{stats.fDiffs[i]}</div>
               </div>
             ))}
           </div>
 
-          {/* جدول الكهرباء */}
-          <div className="space-y-3 pb-6">
-            <h3 className="text-[10px] font-black text-gray-500 px-2 uppercase tracking-widest italic">⚡ إنتاج الكيلو واط</h3>
+          {/* قسم الكهرباء */}
+          <div className="space-y-3">
+            <h3 className="text-[10px] font-black text-slate-500 px-3 uppercase tracking-[0.3em]">⚡ Power Analytics</h3>
             {kwRows.map((row, i) => (
-              <div key={row.id} className="glass flex items-center gap-2 py-2 px-3 hover:bg-white/5 transition-all">
-                <span className="text-[10px] font-bold w-12 text-yellow-500">{row.name}</span>
-                <div className="flex-1"><input type="number" placeholder="أمس" value={row.yest} onChange={(e)=>{const n=[...kwRows]; n[i].yest=e.target.value; setKwRows(n)}} /></div>
-                <div className="flex-1"><input type="number" placeholder="اليوم" value={row.today} onChange={(e)=>{const n=[...kwRows]; n[i].today=e.target.value; setKwRows(n)}} /></div>
-                <span className="text-yellow-400 font-black w-12 text-center text-xl tabular-nums">{stats.kDiffs[i]}</span>
+              <div key={row.id} className="glass-panel p-4 rounded-3xl flex items-center gap-3 border-yellow-500/10">
+                <div className="w-10 h-10 rounded-xl bg-yellow-500/10 flex items-center justify-center font-black text-yellow-400 italic text-xs border border-yellow-500/20">{row.name.split(' ')[1]}</div>
+                <div className="flex-1"><input type="number" placeholder="Yest" value={row.yest} onChange={(e)=>{const n=[...kwRows]; n[i].yest=e.target.value; setKwRows(n)}} /></div>
+                <div className="flex-1"><input type="number" placeholder="Today" value={row.today} onChange={(e)=>{const n=[...kwRows]; n[i].today=e.target.value; setKwRows(n)}} /></div>
+                <div className="w-14 text-center font-black text-2xl text-blue-400 tabular-nums">{stats.kDiffs[i]}</div>
               </div>
             ))}
           </div>
         </div>
+
+        <footer className="text-center py-6 opacity-20 text-[8px] font-black tracking-[1.5em] uppercase">SYSTEM SECURED</footer>
       </div>
     </div>
   );
