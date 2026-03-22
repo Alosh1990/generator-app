@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useMemo } from 'react';
 
-export default function GeneratorFinalUltraPro3D() {
+export default function GeneratorStablePro3D() {
   const [mounted, setMounted] = useState(false);
   const [fuelRows, setFuelRows] = useState([
     { name: 'CAT 1', yesterday: '', today: '' },
@@ -15,23 +15,23 @@ export default function GeneratorFinalUltraPro3D() {
   ]);
   const [initialStock, setInitialStock] = useState('');
 
-  // تأثيرات ديناميكية عند تحميل الصفحة
   useEffect(() => {
     setMounted(true);
-    const savedFuel = localStorage.getItem('fuel_vFinal');
-    const savedKW = localStorage.getItem('kw_vFinal');
-    const savedStock = localStorage.getItem('stock_vFinal');
-    if (savedFuel) setFuelRows(JSON.parse(savedFuel));
-    if (savedKW) setKwRows(JSON.parse(savedKW));
-    if (savedStock) setInitialStock(savedStock);
+    try {
+      const savedFuel = localStorage.getItem('fuel_stable_v1');
+      const savedKW = localStorage.getItem('kw_stable_v1');
+      const savedStock = localStorage.getItem('stock_stable_v1');
+      if (savedFuel) setFuelRows(JSON.parse(savedFuel));
+      if (savedKW) setKwRows(JSON.parse(savedKW));
+      if (savedStock) setInitialStock(savedStock);
+    } catch (e) { console.error("Error loading data", e); }
   }, []);
 
-  // حفظ تلقائي فوري وآمن للبيانات
   useEffect(() => {
     if (mounted) {
-      localStorage.setItem('fuel_vFinal', JSON.stringify(fuelRows));
-      localStorage.setItem('kw_vFinal', JSON.stringify(kwRows));
-      localStorage.setItem('stock_vFinal', initialStock);
+      localStorage.setItem('fuel_stable_v1', JSON.stringify(fuelRows));
+      localStorage.setItem('kw_stable_v1', JSON.stringify(kwRows));
+      localStorage.setItem('stock_stable_v1', initialStock);
     }
   }, [fuelRows, kwRows, initialStock, mounted]);
 
@@ -46,28 +46,40 @@ export default function GeneratorFinalUltraPro3D() {
     const kSums = kwRows.map(r => (parseFloat(r.today) || 0) - (parseFloat(r.yesterday) || 0));
     const totalF = fSums.reduce((a, b) => a + (b > 0 ? b : 0), 0);
     const totalK = kSums.reduce((a, b) => a + (b > 0 ? b : 0), 0);
-    const remaining = (parseFloat(initialStock) || 0) - totalF;
-    return { fSums, kSums, totalF, totalK, remaining };
+    const stockNum = parseFloat(initialStock) || 0;
+    const remaining = stockNum - totalF;
+    
+    return { 
+      fSums, 
+      kSums, 
+      totalF: totalF || 0, 
+      totalK: totalK || 0, 
+      remaining: remaining || 0 
+    };
   }, [fuelRows, kwRows, initialStock]);
 
   if (!mounted) return null;
 
+  const safeFormat = (num: number) => {
+    return (num || 0).toLocaleString('en-US');
+  };
+
   return (
-    <div className="min-h-screen bg-[#06070a] text-white p-4 font-sans selection:bg-cyan-500/30 overflow-x-hidden" dir="rtl">
+    <div className="min-h-screen bg-[#08090c] text-slate-200 p-4 font-sans overflow-x-hidden selection:bg-blue-500/30" dir="rtl">
       
-      {/* Background Cinematic Effects (المؤثرات السينمائية الخلفية) */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none opacity-60">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/10 blur-[130px] rounded-full animate-pulse-slow"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-cyan-600/10 blur-[130px] rounded-full animate-pulse-slow"></div>
+      {/* Background Glows */}
+      <div className="fixed inset-0 pointer-events-none opacity-50">
+        <div className="absolute top-[-10%] left-[-10%] w-80 h-80 bg-blue-600/10 blur-[120px] rounded-full animate-pulse"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-80 h-80 bg-cyan-600/10 blur-[120px] rounded-full"></div>
       </div>
 
-      <div className="max-w-md mx-auto relative z-10 space-y-6 pb-12">
+      <div className="max-w-md mx-auto relative z-10 space-y-6">
         
-        {/* Header (الهيدر الزجاجي) */}
-        <header className="glass-panel p-6 rounded-[2.5rem] flex justify-between items-center shadow-3d-flat border border-white/5 mt-4 animate-slide-down">
+        {/* Header */}
+        <header className="glass-card p-6 rounded-[2.5rem] flex justify-between items-center shadow-3d border border-white/5">
           <div>
-            <h1 className="text-2xl font-black bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent italic tracking-tight">GMS Pro v1.0</h1>
-            <p className="text-[9px] text-slate-600 font-bold tracking-[0.2em] uppercase mt-1">Smart Generator Management</p>
+            <h1 className="text-2xl font-black bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent italic">نظام المولدات Pro</h1>
+            <p className="text-[9px] text-slate-600 font-bold tracking-widest mt-1 uppercase">Operational Dashboard</p>
           </div>
           <button 
             onClick={() => confirm("ترحيل البيانات للغد؟") && (
@@ -75,125 +87,97 @@ export default function GeneratorFinalUltraPro3D() {
               setFuelRows(fuelRows.map(r => ({ ...r, yesterday: r.today, today: '' }))),
               setKwRows(kwRows.map(r => ({ ...r, yesterday: r.today, today: '' })))
             )}
-            className="btn-3d-active text-[10px] font-black px-4 py-2 rounded-xl"
+            className="bg-[#0f1117] border border-white/10 px-4 py-2 rounded-xl text-[10px] font-black shadow-3d active:scale-95 transition-transform"
           >
             ترحيل ⏭️
           </button>
         </header>
 
-        {/* Fuel Card (بطاقة الوقود النيون) */}
-        <section className="glass-panel rounded-[2.5rem] p-5 shadow-3d-flat border border-blue-900/10 space-y-4 group">
-          <div className="flex justify-between items-center mb-1">
-            <div className="flex items-center gap-3">
-              <span className="w-3 h-5 bg-blue-500 rounded-lg shadow-glow-blue animate-pulse"></span>
-              <h2 className="text-sm font-black text-blue-300">مراقبة صرف الكاز (لتر)</h2>
-            </div>
-            <span className="text-[10px] text-slate-600 font-bold">LITERS</span>
+        {/* Fuel Section */}
+        <section className="glass-card rounded-[2.5rem] p-5 shadow-3d border border-blue-500/10 space-y-4">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="w-2 h-5 bg-blue-500 rounded-full shadow-[0_0_10px_#3b82f6]"></span>
+            <h2 className="text-sm font-black text-blue-300 uppercase tracking-tighter">قراءات الوقود (Ltr)</h2>
           </div>
           {fuelRows.map((row, idx) => (
-            <div key={idx} className="bg-[#0c0e14]/50 p-4 rounded-2xl shadow-inner-3d border border-white/5 flex items-center gap-3 transition-all hover:border-blue-500/30">
-              <span className="w-14 font-black text-xs text-blue-200 italic">{row.name}</span>
-              <input type="number" value={row.yesterday} onChange={(e)=>updateValue('fuel', idx, 'yesterday', e.target.value)} className="input-3d" placeholder="أمس" />
-              <input type="number" value={row.today} onChange={(e)=>updateValue('fuel', idx, 'today', e.target.value)} className="input-3d-active border-blue-500/40 text-blue-100" placeholder="يوم" />
-              <div className="w-14 text-center font-black text-emerald-400 text-lg group-hover:animate-scale-in">{totals.fSums[idx] > 0 ? totals.fSums[idx] : 0}</div>
+            <div key={idx} className="bg-black/40 p-4 rounded-2xl border border-white/5 flex items-center gap-3 shadow-inner-3d transition-all hover:bg-black/60">
+              <span className="w-12 font-black text-[10px] text-slate-500 italic">{row.name}</span>
+              <input type="number" value={row.yesterday} onChange={(e)=>updateValue('fuel', idx, 'yesterday', e.target.value)} className="input-glass" placeholder="أمس" />
+              <input type="number" value={row.today} onChange={(e)=>updateValue('fuel', idx, 'today', e.target.value)} className="input-glass-active" placeholder="اليوم" />
+              <div className="w-14 text-center font-black text-emerald-400 text-lg">{totals.fSums[idx] > 0 ? safeFormat(totals.fSums[idx]) : 0}</div>
             </div>
           ))}
-          <div className="p-4 bg-gradient-to-r from-blue-950/20 to-transparent rounded-2xl border-t border-blue-800/20 flex justify-between items-center mt-2">
-            <span className="text-xs font-bold text-slate-500">إجمالي صرف الوقود:</span>
-            <span className="text-2xl font-black text-blue-400 shadow-glow-blue-txt">{totals.totalFuel.toLocaleString()}</span>
+          <div className="p-4 bg-blue-500/5 rounded-2xl border-t border-blue-500/10 flex justify-between items-center">
+            <span className="text-[10px] font-bold text-slate-500 uppercase">إجمالي الصرف</span>
+            <span className="text-2xl font-black text-blue-400 drop-shadow-[0_0_8px_rgba(59,130,246,0.3)]">{safeFormat(totals.totalF)}</span>
           </div>
         </section>
 
-        {/* KW Card (بطاقة الطاقة النيون) */}
-        <section className="glass-panel rounded-[2.5rem] p-5 shadow-3d-flat border border-cyan-900/10 space-y-4 group">
-          <div className="flex justify-between items-center mb-1">
-            <div className="flex items-center gap-3">
-              <span className="w-3 h-5 bg-cyan-500 rounded-lg shadow-glow-cyan animate-pulse"></span>
-              <h2 className="text-sm font-black text-cyan-300">إنتاج الطاقة (kW)</h2>
-            </div>
-            <span className="text-[10px] text-slate-600 font-bold">POWER</span>
+        {/* KW Section */}
+        <section className="glass-card rounded-[2.5rem] p-5 shadow-3d border border-cyan-500/10 space-y-4">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="w-2 h-5 bg-cyan-500 rounded-full shadow-[0_0_10px_#06b6d4]"></span>
+            <h2 className="text-sm font-black text-cyan-300 uppercase tracking-tighter">إنتاج الطاقة (kW)</h2>
           </div>
           {kwRows.map((row, idx) => (
-            <div key={idx} className="bg-[#0c0e14]/50 p-4 rounded-2xl shadow-inner-3d border border-white/5 flex items-center gap-3 transition-all hover:border-cyan-500/30">
-              <span className="w-14 font-black text-xs text-cyan-200 italic">{row.name}</span>
-              <input type="number" value={row.yesterday} onChange={(e)=>updateValue('kw', idx, 'yesterday', e.target.value)} className="input-3d" placeholder="أمس" />
-              <input type="number" value={row.today} onChange={(e)=>updateValue('kw', idx, 'today', e.target.value)} className="input-3d-active border-cyan-500/40 text-cyan-100" placeholder="يوم" />
-              <div className="w-14 text-center font-black text-cyan-400 text-lg group-hover:animate-scale-in">{totals.kSums[idx] > 0 ? totals.kSums[idx] : 0}</div>
+            <div key={idx} className="bg-black/40 p-4 rounded-2xl border border-white/5 flex items-center gap-3 shadow-inner-3d transition-all hover:bg-black/60">
+              <span className="w-12 font-black text-[10px] text-slate-500 italic">{row.name}</span>
+              <input type="number" value={row.yesterday} onChange={(e)=>updateValue('kw', idx, 'yesterday', e.target.value)} className="input-glass" placeholder="أمس" />
+              <input type="number" value={row.today} onChange={(e)=>updateValue('kw', idx, 'today', e.target.value)} className="input-glass-active border-cyan-500/30 text-cyan-100" placeholder="اليوم" />
+              <div className="w-14 text-center font-black text-cyan-400 text-lg">{totals.kSums[idx] > 0 ? safeFormat(totals.kSums[idx]) : 0}</div>
             </div>
           ))}
-          <div className="p-4 bg-gradient-to-r from-cyan-950/20 to-transparent rounded-2xl border-t border-cyan-800/20 flex justify-between items-center mt-2">
-            <span className="text-xs font-bold text-slate-500">إجمالي الإنتاج:</span>
-            <span className="text-2xl font-black text-cyan-400 shadow-glow-cyan-txt">{totals.totalKW.toLocaleString()}</span>
+          <div className="p-4 bg-cyan-500/5 rounded-2xl border-t border-cyan-500/10 flex justify-between items-center">
+            <span className="text-[10px] font-bold text-slate-500 uppercase">إجمالي الطاقة</span>
+            <span className="text-2xl font-black text-cyan-400 drop-shadow-[0_0_8px_rgba(6,182,212,0.3)]">{safeFormat(totals.totalK)}</span>
           </div>
         </section>
 
-        {/* Remaining (الخزين الصافي - البطاقة الرئيسية) */}
-        <div className="space-y-4 relative overflow-hidden p-6 glass-panel rounded-[3rem] shadow-3d-flat border border-white/5 text-center flex flex-col items-center">
-            {/* Background pattern */}
-            <div className="absolute inset-0 bg-blue-600/5 [mask-image:linear-gradient(180deg,#fff,rgba(255,255,255,0))] opacity-50"></div>
-            
-            <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-1 z-10">الخزين الكلي في الخزان الرئيسي (لتر)</label>
-            <input 
-              type="number" 
-              value={initialStock} 
-              onChange={(e)=>setInitialStock(e.target.value)} 
-              className="w-full bg-[#0c0e14]/80 border-2 border-blue-500/30 p-5 rounded-2xl text-4xl font-black text-blue-400 outline-none shadow-inner-3d text-center focus:border-blue-500 focus:ring-4 ring-blue-500/10 transition-all z-10"
-              placeholder="0"
-            />
-            
-            <div className="w-full h-1 bg-black/40 rounded-full mt-6 shadow-inner-3d z-10 overflow-hidden">
-                <div 
-                    className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full transition-all duration-1000 shadow-glow-blue-txt animate-shimmer"
-                    style={{ width: `${Math.min(100, (totals.remaining / 10000) * 100)}%` }}
-                ></div>
-            </div>
+        {/* Main Stock (The 3D Hero) */}
+        <div className="glass-card p-8 rounded-[3rem] shadow-3d border border-white/5 relative overflow-hidden flex flex-col items-center">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl"></div>
+          
+          <label className="text-[9px] font-black text-slate-600 uppercase tracking-[0.3em] mb-3">الخزين الاحتياطي الكلي</label>
+          <input 
+            type="number" 
+            value={initialStock} 
+            onChange={(e)=>setInitialStock(e.target.value)} 
+            className="w-full bg-black/40 border-2 border-white/5 p-4 rounded-2xl text-4xl font-black text-blue-400 text-center outline-none focus:border-blue-500/40 shadow-inner-3d transition-all"
+            placeholder="0"
+          />
 
-            <p className="text-[9px] font-black text-blue-200uppercase tracking-widest mt-6 mb-1 z-10">المتبقي الصافي الآن</p>
-            <p className="text-7xl font-black text-white tracking-tighter drop-shadow-3d animate-text-glow z-10">
-              {totals.remaining.toLocaleString()}
-              <span className="text-xs font-normal text-cyan-400 ml-2 italic">Ltr</span>
+          <div className="mt-8 text-center">
+            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">صافي الوقود المتبقي</p>
+            <p className="text-7xl font-black text-white tracking-tighter drop-shadow-lg">
+              {safeFormat(totals.remaining)}
+              <span className="text-xs font-normal text-cyan-500 ml-2 italic underline decoration-cyan-900 underline-offset-4">Ltr</span>
             </p>
+          </div>
+
+          <div className="w-full h-1.5 bg-black/50 rounded-full mt-6 overflow-hidden border border-white/5">
+            <div 
+              className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 shadow-[0_0_10px_#3b82f6] transition-all duration-1000"
+              style={{ width: `${Math.min(100, Math.max(0, (totals.remaining / 10000) * 100))}%` }}
+            ></div>
+          </div>
         </div>
 
+        <footer className="text-center py-6 text-slate-800 text-[8px] font-bold tracking-[0.5em] uppercase">
+          Autonomous Power Management System • 2026
+        </footer>
       </div>
 
-      {/* Footer info (فوتر الاحترافي) */}
-      <footer className="text-center p-8 text-slate-700 text-[10px] font-bold tracking-[0.3em]">
-        DESIGNED FOR EXTREME OPERATIONS • 2026
-      </footer>
-
-      {/* Global CSS for unique animations and effects (جميع التأثيرات والمؤثرات البصرية) */}
       <style jsx global>{`
-        @keyframes slideDown { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        @keyframes textGlow { 0%, 100% { filter: drop-shadow(0 0 5px rgba(255,255,255,0.4)); } 50% { filter: drop-shadow(0 0 15px rgba(59,130,246,0.6)); } }
-        @keyframes pulseSlow { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.6; } }
-        @keyframes scaleIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .glass-card { background: rgba(15, 17, 23, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .shadow-3d { box-shadow: 20px 20px 50px rgba(0,0,0,0.5), -5px -5px 15px rgba(255,255,255,0.01); }
+        .shadow-inner-3d { box-shadow: inset 4px 4px 12px rgba(0,0,0,0.8), inset -2px -2px 6px rgba(255,255,255,0.01); }
         
-        .animate-slide-down { animation: slideDown 0.8s ease-out; }
-        .animate-text-glow { animation: textGlow 4s infinite ease-in-out; }
-        .animate-pulse-slow { animation: pulseSlow 5s infinite ease-in-out; }
-        .animate-scale-in { animation: scaleIn 0.3s ease-out; }
-        .animate-shimmer { background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%); background-size: 200% 100%; animation: shimmer 2.5s infinite linear; }
-
-        .glass-panel { background: rgba(13, 15, 22, 0.7); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); }
-        .shadow-3d-flat { box-shadow: 20px 20px 40px #040507, -5px -5px 15px rgba(255,255,255,0.01); }
-        .shadow-inner-3d { box-shadow: inset 4px 4px 10px #000, inset -2px -2px 5px rgba(255,255,255,0.01); }
-        .shadow-glow-blue { box-shadow: 0 0 15px rgba(59, 130, 246, 0.6); }
-        .shadow-glow-cyan { box-shadow: 0 0 15px rgba(6, 182, 212, 0.6); }
-        .shadow-glow-blue-txt { filter: drop-shadow(0 0 10px #3b82f6); }
-        .shadow-glow-cyan-txt { filter: drop-shadow(0 0 10px #06b6d4); }
-        .drop-shadow-3d { filter: drop-shadow(5px 5px 3px #000); }
-        
-        .btn-3d-active { background: #050608; border: 1px solid #1c222d; color: #a1a1aa; box-shadow: 4px 4px 8px #040507, -2px -2px 5px #1c222d; transition: all 0.2s; }
-        .btn-3d-active:active { transform: translateY(2px); box-shadow: 1px 1px 2px #040507, -1px -1px 2px #1c222d; color: #fff; border-color: #3f3f46; }
-
-        .input-3d { width: 100%; background: #0a0c10; border: 1px solid #111; border-radius: 10px; padding: 10px; text-align: center; font-weight: 700; color: #3f3f46; outline: none; box-shadow: inset 3px 3px 6px #000; font-size: 14px; }
-        .input-3d-active { width: 100%; background: #0a0c10; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 10px; text-align: center; font-weight: 900; color: #fff; outline: none; box-shadow: 0 0 15px rgba(255,255,255,0.05); font-size: 14px; transition: all 0.3s; }
-        .input-3d-active:focus { border-color: rgba(255,255,255,0.3); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255,255,255,0.1); }
+        .input-glass { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.03); border-radius: 12px; padding: 10px; text-align: center; font-weight: 700; color: #475569; font-size: 14px; outline: none; }
+        .input-glass-active { width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(59,130,246,0.2); border-radius: 12px; padding: 10px; text-align: center; font-weight: 900; color: #fff; font-size: 14px; outline: none; transition: all 0.3s; }
+        .input-glass-active:focus { border-color: rgba(59,130,246,0.5); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59,130,246,0.1); }
 
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        body { background-color: #06070a; }
+        body { background-color: #08090c; margin: 0; }
       `}</style>
     </div>
   );
