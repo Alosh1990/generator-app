@@ -1,231 +1,158 @@
 "use client";
-import React, { useState, useEffect, useMemo } from "react";
-import { motion } from "framer-motion";
+import React, { useState, useMemo } from "react";
 
-export default function RakbaPro() {
-  const [mounted, setMounted] = useState(false);
+export default function Page() {
+  const [activeTab, setActiveTab] = useState("kwh");
 
-  const [stockBefore, setStockBefore] = useState("26820");
-
-  const [fuelRows, setFuelRows] = useState([
-    { id: 1, name: "Cat 1", yest: "732942", today: "733835" },
-    { id: 2, name: "Cat 2", yest: "757151", today: "758214" },
-    { id: 3, name: "Cat 3", yest: "664490", today: "665588" },
+  const [rowsKwh, setRowsKwh] = useState([
+    { name: "Cat 1", y: "2661561", t: "2664809" },
+    { name: "Cat 2", y: "2693445", t: "2697404" },
+    { name: "Cat 3", y: "1541614", t: "1545662" },
   ]);
 
-  const [kwRows, setKwRows] = useState([
-    { id: 1, name: "Cat 1", yest: "2661561", today: "2664809" },
-    { id: 2, name: "Cat 2", yest: "2693445", today: "2697404" },
-    { id: 3, name: "Cat 3", yest: "1541614", today: "1545662" },
+  const [rowsGas, setRowsGas] = useState([
+    { name: "Cat 1", y: "732942", t: "733835" },
+    { name: "Cat 2", y: "757151", t: "758214" },
+    { name: "Cat 3", y: "664490", t: "665588" },
   ]);
 
-  // تحميل البيانات
-  useEffect(() => {
-    const saved = localStorage.getItem("rakba-data");
-    if (saved) {
-      const data = JSON.parse(saved);
-      setFuelRows(data.fuelRows);
-      setKwRows(data.kwRows);
-      setStockBefore(data.stockBefore);
-    }
-    setMounted(true);
-  }, []);
+  const [stockBeforeKwh, setStockBeforeKwh] = useState("26820");
+  const [stockBeforeGas, setStockBeforeGas] = useState("26820");
 
-  // حفظ تلقائي
-  useEffect(() => {
-    localStorage.setItem(
-      "rakba-data",
-      JSON.stringify({ fuelRows, kwRows, stockBefore })
+  const statsKwh = useMemo(() => {
+    const diffs = rowsKwh.map(r =>
+      Math.max(0, (Number(r.t) || 0) - (Number(r.y) || 0))
     );
-  }, [fuelRows, kwRows, stockBefore]);
-
-  const stats = useMemo(() => {
-    const fDiffs = fuelRows.map(
-      (r) => Math.max(0, (Number(r.today) || 0) - (Number(r.yest) || 0))
-    );
-    const kDiffs = kwRows.map(
-      (r) => Math.max(0, (Number(r.today) || 0) - (Number(r.yest) || 0))
-    );
-
-    const totalFuel = fDiffs.reduce((a, b) => a + b, 0);
-    const totalKW = kDiffs.reduce((a, b) => a + b, 0);
-
+    const total = diffs.reduce((a, b) => a + b, 0);
     return {
-      fDiffs,
-      kDiffs,
-      totalFuel,
-      totalKW,
-      current: (Number(stockBefore) || 0) - totalFuel,
+      diffs,
+      total,
+      current: (Number(stockBeforeKwh) || 0) - total,
     };
-  }, [stockBefore, fuelRows, kwRows]);
+  }, [rowsKwh, stockBeforeKwh]);
 
-  if (!mounted) return null;
+  const statsGas = useMemo(() => {
+    const diffs = rowsGas.map(r =>
+      Math.max(0, (Number(r.t) || 0) - (Number(r.y) || 0))
+    );
+    const total = diffs.reduce((a, b) => a + b, 0);
+    return {
+      diffs,
+      total,
+      current: (Number(stockBeforeGas) || 0) - total,
+    };
+  }, [rowsGas, stockBeforeGas]);
 
-  const glass =
-    "backdrop-blur-xl bg-white/5 border border-white/10 shadow-lg rounded-2xl";
+  const rows = activeTab === "kwh" ? rowsKwh : rowsGas;
+  const setRows = activeTab === "kwh" ? setRowsKwh : setRowsGas;
+  const stats = activeTab === "kwh" ? statsKwh : statsGas;
+  const stockBefore = activeTab === "kwh" ? stockBeforeKwh : stockBeforeGas;
+  const setStockBefore = activeTab === "kwh" ? setStockBeforeKwh : setStockBeforeGas;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-zinc-900 to-black text-white p-4 font-sans">
-      <div className="max-w-2xl mx-auto space-y-6">
+    <main className="min-h-screen flex items-center justify-center bg-[#070b12] p-4 text-white">
+      <div className="w-full max-w-5xl p-4 sm:p-6 rounded-3xl bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 shadow-[0_0_60px_rgba(0,255,255,0.3)]">
+        <div className="bg-[#0b111c]/90 backdrop-blur-xl rounded-3xl p-4 sm:p-6 border border-white/10">
 
-        {/* HEADER */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className={`${glass} p-4 flex justify-between items-center`}
-        >
-          <h1 className="text-2xl font-black">🚀 Rakba PRO</h1>
-          <button
-            onClick={() => window.print()}
-            className="text-xs bg-white/10 px-3 py-2 rounded-lg hover:bg-white/20"
-          >
-            PDF
-          </button>
-        </motion.div>
-
-        {/* SUMMARY */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="grid grid-cols-2 gap-4"
-        >
-          <div className={`${glass} p-4`}>
-            <p className="text-zinc-400 text-sm">صرف الكاز</p>
-            <p className="text-2xl font-black text-blue-400">
-              {stats.totalFuel}
-            </p>
-          </div>
-
-          <div className={`${glass} p-4`}>
-            <p className="text-zinc-400 text-sm">صرف الكهرباء</p>
-            <p className="text-2xl font-black text-yellow-400">
-              {stats.totalKW.toLocaleString()}
-            </p>
-          </div>
-        </motion.div>
-
-        {/* FUEL TABLE */}
-        <motion.div className={`${glass} p-4`}>
-          <h2 className="mb-3 font-bold">⛽ الكاز</h2>
-
-          {fuelRows.map((row, i) => (
-            <motion.div
-              key={row.id}
-              layout
-              className="grid grid-cols-4 gap-2 mb-3 items-center"
+          {/* HEADER TABS */}
+          <div className="flex gap-4 mb-6 cursor-pointer">
+            <div
+              onClick={() => setActiveTab("kwh")}
+              className={`flex-1 text-center py-4 rounded-xl border ${
+                activeTab === "kwh"
+                  ? "border-cyan-400 bg-cyan-500/30 font-bold"
+                  : "border-cyan-400/20 bg-cyan-500/10"
+              } transition-all duration-200`}
             >
-              <span className="text-zinc-400">{row.name}</span>
-
-              <input
-                type="number"
-                value={row.yest}
-                onChange={(e) => {
-                  const n = [...fuelRows];
-                  n[i].yest = e.target.value;
-                  setFuelRows(n);
-                }}
-                className="bg-black/40 p-2 rounded text-center"
-              />
-
-              <input
-                type="number"
-                value={row.today}
-                onChange={(e) => {
-                  const n = [...fuelRows];
-                  n[i].today = e.target.value;
-                  setFuelRows(n);
-                }}
-                className="bg-black/40 p-2 rounded text-center"
-              />
-
-              <span className="font-black text-blue-400">
-                {stats.fDiffs[i]}
-              </span>
-            </motion.div>
-          ))}
-        </motion.div>
-
-        {/* KW TABLE */}
-        <motion.div className={`${glass} p-4`}>
-          <h2 className="mb-3 font-bold">⚡ الكهرباء</h2>
-
-          {kwRows.map((row, i) => (
-            <motion.div
-              key={row.id}
-              layout
-              className="grid grid-cols-4 gap-2 mb-3 items-center"
+              جدول صرف الكيلو وات 📋
+            </div>
+            <div
+              onClick={() => setActiveTab("gas")}
+              className={`flex-1 text-center py-4 rounded-xl border ${
+                activeTab === "gas"
+                  ? "border-cyan-400 bg-cyan-500/30 font-bold"
+                  : "border-cyan-400/20 bg-cyan-500/10"
+              } transition-all duration-200`}
             >
-              <span className="text-zinc-400">{row.name}</span>
+              جدول صرف الكاز 📋
+            </div>
+          </div>
 
+          {/* TABLE */}
+          <div className="rounded-2xl overflow-x-auto border border-cyan-400/20">
+            <div className="min-w-[400px]">
+
+              <div className="grid grid-cols-4 text-center text-yellow-300 bg-black/40 py-3">
+                <span>الفئة</span>
+                <span>عداد الأمس</span>
+                <span>عداد اليوم</span>
+                <span>الصرف</span>
+              </div>
+
+              {rows.map((r, i) => (
+                <div key={i} className="grid grid-cols-4 text-center py-4 border-t border-white/5">
+                  <span className="text-yellow-200">{r.name}</span>
+                  <input
+                    type="number"
+                    value={r.y}
+                    onChange={(e) => {
+                      const newRows = [...rows];
+                      newRows[i].y = e.target.value;
+                      setRows(newRows);
+                    }}
+                    className="bg-black/40 rounded p-3 text-center focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                  />
+                  <input
+                    type="number"
+                    value={r.t}
+                    onChange={(e) => {
+                      const newRows = [...rows];
+                      newRows[i].t = e.target.value;
+                      setRows(newRows);
+                    }}
+                    className="bg-black/40 rounded p-3 text-center focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                  />
+                  <span className="text-cyan-400 font-bold text-lg glow">
+                    {stats.diffs[i]}
+                  </span>
+                </div>
+              ))}
+
+              <div className="flex justify-between px-6 py-4 bg-black/50 text-yellow-300 font-bold text-lg">
+                <span>المجموع</span>
+                <span>{stats.total.toLocaleString()} {activeTab === "kwh" ? "kWh" : "لتر"}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* STOCK */}
+          <div className="mt-6 p-5 rounded-2xl border border-cyan-400/20 bg-gradient-to-r from-cyan-500/10 to-blue-500/10">
+            <div className="flex justify-between items-center">
+              <span>الخزين قبل:</span>
               <input
                 type="number"
-                value={row.yest}
-                onChange={(e) => {
-                  const n = [...kwRows];
-                  n[i].yest = e.target.value;
-                  setKwRows(n);
-                }}
-                className="bg-black/40 p-2 rounded text-center"
+                value={stockBefore}
+                onChange={(e) => setStockBefore(e.target.value)}
+                className="bg-black/40 rounded p-3 w-32 text-center focus:ring-2 focus:ring-cyan-400"
               />
+            </div>
 
-              <input
-                type="number"
-                value={row.today}
-                onChange={(e) => {
-                  const n = [...kwRows];
-                  n[i].today = e.target.value;
-                  setKwRows(n);
-                }}
-                className="bg-black/40 p-2 rounded text-center"
-              />
-
-              <span className="font-black text-yellow-400">
-                {stats.kDiffs[i]}
+            <div className="flex justify-between items-center mt-4">
+              <span>الخزين بعد:</span>
+              <span className="text-emerald-400 text-2xl font-black glow">
+                {stats.current.toLocaleString()}
               </span>
-            </motion.div>
-          ))}
-        </motion.div>
-
-        {/* STOCK */}
-        <motion.div className={`${glass} p-4 space-y-3`}>
-          <div className="flex justify-between items-center">
-            <span>الخزين قبل</span>
-            <input
-              type="number"
-              value={stockBefore}
-              onChange={(e) => setStockBefore(e.target.value)}
-              className="bg-black/40 p-2 rounded w-32 text-center"
-            />
+            </div>
           </div>
 
-          <div className="flex justify-between items-center">
-            <span>الخزين بعد</span>
-            <span className="text-2xl font-black text-emerald-400">
-              {stats.current.toLocaleString()}
-            </span>
-          </div>
-        </motion.div>
-
-        {/* ACTION */}
-        <motion.button
-          whileTap={{ scale: 0.95 }}
-          onClick={() => {
-            if (confirm("ترحيل اليوم؟")) {
-              setFuelRows(
-                fuelRows.map((r) => ({ ...r, yest: r.today, today: "" }))
-              );
-              setKwRows(
-                kwRows.map((r) => ({ ...r, yest: r.today, today: "" }))
-              );
-              setStockBefore(stats.current.toString());
-            }
-          }}
-          className="w-full bg-white text-black py-4 rounded-2xl font-black"
-        >
-          ⏭️ يوم جديد
-        </motion.button>
-
+        </div>
       </div>
-    </div>
+
+      <style jsx>{`
+        .glow {
+          text-shadow: 0 0 6px cyan, 0 0 12px cyan;
+        }
+      `}</style>
+    </main>
   );
 }
