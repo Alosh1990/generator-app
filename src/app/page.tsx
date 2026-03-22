@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useMemo } from 'react';
 
-export default function GeneratorIPhoneOS() {
+export default function GeneratorFinalFixedUI() {
   const [mounted, setMounted] = useState(false);
   const [fuelRows, setFuelRows] = useState([
     { name: 'CAT 1', yesterday: '', today: '' },
@@ -17,26 +17,29 @@ export default function GeneratorIPhoneOS() {
 
   useEffect(() => {
     setMounted(true);
-    const savedFuel = localStorage.getItem('v9_fuel');
-    const savedKW = localStorage.getItem('v9_kw');
-    const savedStock = localStorage.getItem('v9_stock');
-    if (savedFuel) setFuelRows(JSON.parse(savedFuel));
-    if (savedKW) setKwRows(JSON.parse(savedKW));
-    if (savedStock) setInitialStock(savedStock);
+    // استرجاع البيانات الآمن
+    try {
+      const savedFuel = localStorage.getItem('fuel_v6');
+      const savedKW = localStorage.getItem('kw_v6');
+      const savedStock = localStorage.getItem('stock_v6');
+      if (savedFuel) setFuelRows(JSON.parse(savedFuel));
+      if (savedKW) setKwRows(JSON.parse(savedKW));
+      if (savedStock) setInitialStock(savedStock);
+    } catch (e) { console.error("Error loading data"); }
   }, []);
 
   useEffect(() => {
     if (mounted) {
-      localStorage.setItem('v9_fuel', JSON.stringify(fuelRows));
-      localStorage.setItem('v9_kw', JSON.stringify(kwRows));
-      localStorage.setItem('v9_stock', initialStock);
+      localStorage.setItem('fuel_v6', JSON.stringify(fuelRows));
+      localStorage.setItem('kw_v6', JSON.stringify(kwRows));
+      localStorage.setItem('stock_v6', initialStock);
     }
   }, [fuelRows, kwRows, initialStock, mounted]);
 
-  const updateValue = (type: 'f' | 'k', i: number, field: 'yesterday' | 'today', v: string) => {
-    const data = type === 'f' ? [...fuelRows] : [...kwRows];
-    data[i][field] = v;
-    type === 'f' ? setFuelRows(data) : setKwRows(data);
+  const updateValue = (type: 'fuel' | 'kw', index: number, field: 'yesterday' | 'today', val: string) => {
+    const data = type === 'fuel' ? [...fuelRows] : [...kwRows];
+    data[index][field] = val;
+    type === 'fuel' ? setFuelRows(data) : setKwRows(data);
   };
 
   const totals = useMemo(() => {
@@ -48,122 +51,119 @@ export default function GeneratorIPhoneOS() {
     return { fSums, kSums, totalF, totalK, remaining: remaining || 0 };
   }, [fuelRows, kwRows, initialStock]);
 
+  const safeFormat = (num: number) => (num || 0).toLocaleString('en-US');
+
   if (!mounted) return null;
 
   return (
-    <div className="min-h-screen bg-black flex justify-center items-center p-0 md:p-10 font-sans" dir="rtl">
-      
-      {/* جسم الهاتف الوهمي - يظهر فقط على الكمبيوتر */}
-      <div className="w-full max-w-[430px] h-screen md:h-[850px] bg-[#090a0f] relative md:rounded-[3.5rem] md:border-[10px] border-[#1a1b23] overflow-hidden shadow-[0_0_100px_rgba(0,0,0,1)] flex flex-col animate-fade-in">
-        
-        {/* Notch (حساسات الآيفون العلوية) */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-[#1a1b23] rounded-b-2xl z-50 hidden md:block"></div>
+    <>
+      {/* 1. الحل السحري للموبايل (Meta Tag) */}
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+      </head>
 
-        {/* محتوى التطبيق */}
-        <div className="flex-1 overflow-y-auto px-6 pt-10 pb-28 no-scrollbar space-y-8">
+      <div className="min-h-screen bg-[#08090c] text-white p-4 md:p-8 font-sans selection:bg-blue-500/30 overflow-x-hidden" dir="rtl">
+        
+        {/* تأثيرات إضاءة خلفية هادئة */}
+        <div className="fixed inset-0 pointer-events-none opacity-40">
+          <div className="absolute top-[-10%] left-[-10%] w-80 h-80 bg-blue-600/20 blur-[100px] rounded-full"></div>
+          <div className="absolute bottom-[-10%] right-[-10%] w-80 h-80 bg-cyan-600/20 blur-[100px] rounded-full"></div>
+        </div>
+
+        <div className="max-w-md mx-auto relative z-10 space-y-6 pb-12">
           
-          {/* Header الاحترافي */}
-          <div className="flex justify-between items-center mb-4">
+          {/* الهيدر الفخم */}
+          <header className="os-glass p-6 rounded-[2rem] flex justify-between items-center shadow-3d border border-white/5 mt-2">
             <div>
-              <h1 className="text-4xl font-black text-white tracking-tighter">المولدات</h1>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                <p className="text-slate-500 text-[10px] font-bold uppercase tracking-[0.2em]">Live System Pro</p>
-              </div>
+              <h1 className="text-xl font-black bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent italic tracking-tight">قمرة القيادة</h1>
+              <p className="text-[10px] text-slate-600 font-bold tracking-widest mt-1 uppercase">GENERATOR PRO v6</p>
             </div>
             <button 
-              onClick={() => confirm("ترحيل البيانات؟") && setFuelRows(fuelRows.map(r=>({...r, yesterday:r.today, today:''})))}
-              className="bg-[#1a1b23] border border-white/5 text-[10px] font-black px-5 py-2.5 rounded-2xl active:scale-90 transition-all text-blue-400 uppercase"
+              onClick={() => confirm("ترحيل البيانات للغد؟") && setFuelRows(fuelRows.map(r => ({ ...r, yesterday: r.today, today: '' })))}
+              className="os-btn text-[10px] font-black px-4 py-2.5 rounded-xl text-blue-400 active:scale-95 transition-all"
             >
-              ترحيل ⏭️
+              ترحيل البيانات ⏭️
             </button>
-          </div>
+          </header>
 
-          {/* الكارت الرئيسي - الخزين المتبقي (تصميم زجاجي عريض) */}
-          <div className="glass-card p-8 rounded-[2.5rem] border border-white/[0.08] shadow-2xl relative overflow-hidden group">
-            <div className="absolute -top-10 -right-10 w-40 h-40 bg-blue-500/10 blur-[80px]"></div>
-            <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4">صافي المتبقي في الخزان</p>
-            <div className="flex items-baseline gap-2 mb-6">
-              <span className="text-7xl font-black text-white tracking-tighter tabular-nums drop-shadow-2xl">
-                {totals.remaining.toLocaleString()}
-              </span>
-              <span className="text-blue-500 font-black text-lg italic">Ltr</span>
-            </div>
+          {/* المخزون الصافي (تصميم زجاجي عريض للموبايل) */}
+          <div className="os-glass p-8 rounded-[2.5rem] shadow-3d border border-white/5 relative overflow-hidden flex flex-col items-center">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 blur-3xl opacity-60"></div>
+            <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-3 z-10">الخزين الكلي الحالي في المستودع</label>
             <input 
               type="number" 
               value={initialStock} 
-              onChange={(e)=>setInitialStock(e.target.value)}
-              placeholder="إدخال القراءة الكلية..."
-              className="w-full bg-black/60 border border-white/10 p-5 rounded-2xl text-center text-lg font-black text-blue-400 outline-none focus:border-blue-500/40 transition-all shadow-inner"
+              onChange={(e)=>setInitialStock(e.target.value)} 
+              className="w-full bg-black/50 border-2 border-white/5 p-4 rounded-2xl text-4xl font-black text-blue-400 outline-none shadow-inner-3d text-center focus:border-blue-500 transition-all z-10"
+              placeholder="0"
             />
+             <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest mt-8 mb-2 z-10">المتبقي الصافي الآمن</p>
+             <h3 className="text-7xl font-black text-white tracking-tighter drop-shadow-3d z-10 animate-text-glow">
+               {safeFormat(totals.remaining)}
+               <span className="text-sm font-normal text-cyan-400 mr-2 italic underline decoration-cyan-900 underline-offset-4">Ltr</span>
+             </h3>
           </div>
 
-          {/* قسم استهلاك الوقود - خطوط عريضة جداً */}
-          <div className="space-y-4">
-            <h2 className="text-xs font-black text-slate-500 uppercase tracking-widest px-2 flex justify-between">
-              <span>⛽ استهلاك الكاز</span>
-              <span className="text-emerald-400 italic">+{totals.totalF}</span>
-            </h2>
+          {/* عدادات الكاز - تنسيق محاذي عمودياً للموبايل */}
+          <section className="os-glass rounded-[2.5rem] p-5 shadow-3d border border-blue-900/10 space-y-4">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="w-2 h-5 bg-blue-500 rounded-full shadow-glow-blue"></span>
+              <h2 className="text-sm font-black text-blue-300">عدادات الكاز (لتر)</h2>
+            </div>
             {fuelRows.map((row, idx) => (
-              <div key={idx} className="bg-[#12141c] p-5 rounded-[2rem] border border-white/5 flex items-center gap-4 transition-all active:bg-[#1a1d29]">
-                <span className="w-14 font-black text-[11px] text-blue-300 italic">{row.name}</span>
-                <input type="number" value={row.yesterday} onChange={(e)=>updateValue('f', idx, 'yesterday', e.target.value)} className="ios-input text-slate-500" placeholder="أمس" />
-                <input type="number" value={row.today} onChange={(e)=>updateValue('f', idx, 'today', e.target.value)} className="ios-input-active border-blue-500/20" placeholder="اليوم" />
-                <div className="w-20 text-center font-black text-2xl text-emerald-400 drop-shadow-sm">
-                  {totals.fSums[idx] > 0 ? totals.fSums[idx] : 0}
+              <div key={idx} className="bg-black/40 p-4 rounded-2xl shadow-inner-3d border border-white/5 flex items-center gap-2 transition-all hover:border-blue-500/30">
+                <span className="w-12 font-black text-[10px] text-slate-500 italic">{row.name}</span>
+                <input type="number" value={row.yesterday} onChange={(e)=>updateValue('fuel', idx, 'yesterday', e.target.value)} className="input-field text-slate-600" placeholder="أمس" />
+                <input type="number" value={row.today} onChange={(e)=>updateValue('fuel', idx, 'today', e.target.value)} className="input-field-active border-blue-500/40 text-blue-100" placeholder="اليوم" />
+                <div className="w-14 text-center font-black text-emerald-400 text-lg">
+                  {totals.fSums[idx] > 0 ? safeFormat(totals.fSums[idx]) : 0}
                 </div>
               </div>
             ))}
-          </div>
+          </section>
 
-          {/* قسم إنتاج الطاقة - ألوان متناسقة */}
-          <div className="space-y-4">
-            <h2 className="text-xs font-black text-slate-500 uppercase tracking-widest px-2 flex justify-between">
-              <span>⚡ إنتاج الطاقة</span>
-              <span className="text-blue-400 italic">+{totals.totalK}</span>
-            </h2>
+          {/* عدادات الطاقة - تنسيق محاذي عمودياً للموبايل */}
+          <section className="os-glass rounded-[2.5rem] p-5 shadow-3d border border-cyan-900/10 space-y-4">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="w-2 h-5 bg-cyan-500 rounded-full shadow-glow-cyan"></span>
+              <h2 className="text-sm font-black text-cyan-300">إنتاج الطاقة الكهربائية (kW)</h2>
+            </div>
             {kwRows.map((row, idx) => (
-              <div key={idx} className="bg-[#12141c] p-5 rounded-[2rem] border border-white/5 flex items-center gap-4 transition-all active:bg-[#1a1d29]">
-                <span className="w-14 font-black text-[11px] text-purple-300 italic">{row.name}</span>
-                <input type="number" value={row.yesterday} onChange={(e)=>updateValue('k', idx, 'yesterday', e.target.value)} className="ios-input text-slate-500" placeholder="أمس" />
-                <input type="number" value={row.today} onChange={(e)=>updateValue('k', idx, 'today', e.target.value)} className="ios-input-active border-purple-500/20" placeholder="اليوم" />
-                <div className="w-20 text-center font-black text-2xl text-blue-400 drop-shadow-sm">
-                  {totals.kSums[idx] > 0 ? totals.kSums[idx] : 0}
+              <div key={idx} className="bg-black/40 p-4 rounded-2xl shadow-inner-3d border border-white/5 flex items-center gap-2 transition-all hover:border-cyan-500/30">
+                <span className="w-12 font-black text-[10px] text-slate-500 italic">{row.name}</span>
+                <input type="number" value={row.yesterday} onChange={(e)=>updateValue('kw', idx, 'yesterday', e.target.value)} className="input-field text-slate-600" placeholder="أمس" />
+                <input type="number" value={row.today} onChange={(e)=>updateValue('kw', idx, 'today', e.target.value)} className="input-field-active border-cyan-500/40 text-cyan-100" placeholder="اليوم" />
+                <div className="w-14 text-center font-black text-cyan-400 text-lg">
+                  {totals.kSums[idx] > 0 ? safeFormat(totals.kSums[idx]) : 0}
                 </div>
               </div>
             ))}
-          </div>
+          </section>
 
         </div>
 
-        {/* Bottom Bar - شكل الآيفون */}
-        <div className="h-24 bg-[#090a0f]/80 backdrop-blur-2xl border-t border-white/5 flex justify-around items-center px-10 pb-4">
-           <div className="flex flex-col items-center gap-1 text-blue-500 scale-110">
-              <span className="text-2xl">📊</span>
-              <span className="text-[9px] font-black uppercase tracking-tighter">البيانات</span>
-           </div>
-           <div className="flex flex-col items-center gap-1 text-slate-700">
-              <span className="text-2xl opacity-40">⚙️</span>
-              <span className="text-[9px] font-black uppercase tracking-tighter">الإعدادات</span>
-           </div>
-        </div>
+        {/* ستايل مخصص لضمان استجابة الموبايل */}
+        <style jsx global>{`
+          @keyframes textGlow { 0%, 100% { filter: drop-shadow(0 0 5px rgba(255,255,255,0.2)); } 50% { filter: drop-shadow(0 0 15px rgba(59,130,246,0.4)); } }
+          .animate-text-glow { animation: textGlow 4s infinite ease-in-out; }
+          .os-glass { background: rgba(13, 15, 22, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+          .shadow-3d { box-shadow: 15px 15px 40px #040507, -5px -5px 15px rgba(255,255,255,0.01); }
+          .shadow-inner-3d { box-shadow: inset 3px 3px 10px #000, inset -1px -1px 5px rgba(255,255,255,0.01); }
+          .shadow-glow-blue { box-shadow: 0 0 10px rgba(59, 130, 246, 0.4); }
+          .shadow-glow-cyan { box-shadow: 0 0 10px rgba(6, 182, 212, 0.4); }
+          .drop-shadow-3d { filter: drop-shadow(5px 5px 3px #000); }
+          
+          .os-btn { background: #0c0e14; border: 1px solid #1c222d; color: #a1a1aa; box-shadow: 4px 4px 10px #040507, -2px -2px 5px #1c222d; transition: all 0.2s; cursor: pointer; }
+          .os-btn:active { transform: translateY(2px); box-shadow: 1px 1px 2px #040507, -1px -1px 2px #1c222d; color: #fff; }
 
+          .input-field { width: 100%; bg: #0a0c10; border: 1px solid #111; border-radius: 10px; p: 10px; text-align: center; font-weight: 700; font-size: 14px; outline: none; box-shadow: inset 2px 2px 5px #000; }
+          .input-field-active { width: 100%; bg: #0a0c10; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; p: 10px; text-align: center; font-weight: 900; font-size: 14px; outline: none; transition: all 0.3s; }
+          .input-field-active:focus { border-color: rgba(255,255,255,0.3); transform: scale(1.05); }
+
+          input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+          body { background-color: #08090c; margin: 0; }
+        `}</style>
       </div>
-
-      <style jsx global>{`
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade-in { animation: fadeIn 0.6s ease-out; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        
-        .glass-card { background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%); backdrop-filter: blur(20px); }
-        
-        .ios-input { width: 100%; background: #000; border: 1px solid #1a1b23; border-radius: 14px; padding: 12px; text-align: center; font-size: 16px; outline: none; transition: all 0.2s; }
-        .ios-input-active { width: 100%; background: #000; border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 12px; text-align: center; font-size: 16px; color: #fff; font-weight: 900; outline: none; transition: all 0.3s; }
-        .ios-input-active:focus { border-color: #3b82f6; transform: scale(1.05); box-shadow: 0 0 20px rgba(59,130,246,0.15); }
-
-        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        body { background-color: #000; margin: 0; overflow: hidden; }
-      `}</style>
-    </div>
+    </>
   );
 }
