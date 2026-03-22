@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useMemo } from 'react';
 
-export default function GeneratorFullView3D() {
+export default function GeneratorFinalUltraPro3D() {
   const [mounted, setMounted] = useState(false);
   const [fuelRows, setFuelRows] = useState([
     { name: 'CAT 1', yesterday: '', today: '' },
@@ -15,21 +15,23 @@ export default function GeneratorFullView3D() {
   ]);
   const [initialStock, setInitialStock] = useState('');
 
+  // تأثيرات ديناميكية عند تحميل الصفحة
   useEffect(() => {
     setMounted(true);
-    const savedFuel = localStorage.getItem('fuel_v5');
-    const savedKW = localStorage.getItem('kw_v5');
-    const savedStock = localStorage.getItem('stock_v5');
+    const savedFuel = localStorage.getItem('fuel_vFinal');
+    const savedKW = localStorage.getItem('kw_vFinal');
+    const savedStock = localStorage.getItem('stock_vFinal');
     if (savedFuel) setFuelRows(JSON.parse(savedFuel));
     if (savedKW) setKwRows(JSON.parse(savedKW));
     if (savedStock) setInitialStock(savedStock);
   }, []);
 
+  // حفظ تلقائي فوري وآمن للبيانات
   useEffect(() => {
     if (mounted) {
-      localStorage.setItem('fuel_v5', JSON.stringify(fuelRows));
-      localStorage.setItem('kw_v5', JSON.stringify(kwRows));
-      localStorage.setItem('stock_v5', initialStock);
+      localStorage.setItem('fuel_vFinal', JSON.stringify(fuelRows));
+      localStorage.setItem('kw_vFinal', JSON.stringify(kwRows));
+      localStorage.setItem('stock_vFinal', initialStock);
     }
   }, [fuelRows, kwRows, initialStock, mounted]);
 
@@ -51,21 +53,21 @@ export default function GeneratorFullView3D() {
   if (!mounted) return null;
 
   return (
-    <div className="min-h-screen bg-[#0a0b10] text-white p-4 font-sans selection:bg-blue-500/30 overflow-x-hidden" dir="rtl">
+    <div className="min-h-screen bg-[#06070a] text-white p-4 font-sans selection:bg-cyan-500/30 overflow-x-hidden" dir="rtl">
       
-      {/* Dynamic Background Glows */}
-      <div className="fixed inset-0 pointer-events-none opacity-40">
-        <div className="absolute top-[-5%] left-[-5%] w-80 h-80 bg-blue-600/20 blur-[100px] animate-pulse"></div>
-        <div className="absolute bottom-[-5%] right-[-5%] w-80 h-80 bg-cyan-600/20 blur-[100px]"></div>
+      {/* Background Cinematic Effects (المؤثرات السينمائية الخلفية) */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none opacity-60">
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/10 blur-[130px] rounded-full animate-pulse-slow"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-cyan-600/10 blur-[130px] rounded-full animate-pulse-slow"></div>
       </div>
 
-      <div className="max-w-md mx-auto relative z-10 space-y-8 pb-10">
+      <div className="max-w-md mx-auto relative z-10 space-y-6 pb-12">
         
-        {/* Header Section */}
-        <header className="glass-card p-6 rounded-[2.5rem] flex justify-between items-center shadow-3d border border-white/10 mt-4">
+        {/* Header (الهيدر الزجاجي) */}
+        <header className="glass-panel p-6 rounded-[2.5rem] flex justify-between items-center shadow-3d-flat border border-white/5 mt-4 animate-slide-down">
           <div>
-            <h1 className="text-2xl font-black bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent italic">نظام المولدات</h1>
-            <p className="text-[10px] text-slate-500 font-bold tracking-widest uppercase">PRO EDITION V5</p>
+            <h1 className="text-2xl font-black bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent italic tracking-tight">GMS Pro v1.0</h1>
+            <p className="text-[9px] text-slate-600 font-bold tracking-[0.2em] uppercase mt-1">Smart Generator Management</p>
           </div>
           <button 
             onClick={() => confirm("ترحيل البيانات للغد؟") && (
@@ -73,93 +75,125 @@ export default function GeneratorFullView3D() {
               setFuelRows(fuelRows.map(r => ({ ...r, yesterday: r.today, today: '' }))),
               setKwRows(kwRows.map(r => ({ ...r, yesterday: r.today, today: '' })))
             )}
-            className="btn-3d-blue text-[10px] font-black px-4 py-2 rounded-xl"
+            className="btn-3d-active text-[10px] font-black px-4 py-2 rounded-xl"
           >
             ترحيل ⏭️
           </button>
         </header>
 
-        {/* Fuel Table Section */}
-        <section className="glass-card rounded-[2.5rem] p-5 shadow-3d border border-white/5 space-y-4">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="w-2 h-5 bg-blue-500 rounded-full shadow-[0_0_10px_#3b82f6]"></span>
-            <h2 className="text-sm font-black text-blue-400">عدادات الكاز (لتر)</h2>
+        {/* Fuel Card (بطاقة الوقود النيون) */}
+        <section className="glass-panel rounded-[2.5rem] p-5 shadow-3d-flat border border-blue-900/10 space-y-4 group">
+          <div className="flex justify-between items-center mb-1">
+            <div className="flex items-center gap-3">
+              <span className="w-3 h-5 bg-blue-500 rounded-lg shadow-glow-blue animate-pulse"></span>
+              <h2 className="text-sm font-black text-blue-300">مراقبة صرف الكاز (لتر)</h2>
+            </div>
+            <span className="text-[10px] text-slate-600 font-bold">LITERS</span>
           </div>
           {fuelRows.map((row, idx) => (
-            <div key={idx} className="bg-black/40 p-4 rounded-2xl shadow-inner-3d border border-white/5 flex items-center gap-3">
-              <span className="w-14 font-black text-xs text-slate-400 italic">{row.name}</span>
-              <input type="number" value={row.yesterday} onChange={(e)=>updateValue('fuel', idx, 'yesterday', e.target.value)} className="input-field" placeholder="أمس" />
-              <input type="number" value={row.today} onChange={(e)=>updateValue('fuel', idx, 'today', e.target.value)} className="input-field-active border-blue-500/30" placeholder="يوم" />
-              <div className="w-14 text-center font-black text-emerald-400 text-lg">{totals.fSums[idx] > 0 ? totals.fSums[idx] : 0}</div>
+            <div key={idx} className="bg-[#0c0e14]/50 p-4 rounded-2xl shadow-inner-3d border border-white/5 flex items-center gap-3 transition-all hover:border-blue-500/30">
+              <span className="w-14 font-black text-xs text-blue-200 italic">{row.name}</span>
+              <input type="number" value={row.yesterday} onChange={(e)=>updateValue('fuel', idx, 'yesterday', e.target.value)} className="input-3d" placeholder="أمس" />
+              <input type="number" value={row.today} onChange={(e)=>updateValue('fuel', idx, 'today', e.target.value)} className="input-3d-active border-blue-500/40 text-blue-100" placeholder="يوم" />
+              <div className="w-14 text-center font-black text-emerald-400 text-lg group-hover:animate-scale-in">{totals.fSums[idx] > 0 ? totals.fSums[idx] : 0}</div>
             </div>
           ))}
-          <div className="p-4 bg-blue-600/10 rounded-2xl border border-blue-500/20 flex justify-between items-center mt-2">
-            <span className="text-xs font-bold text-blue-200">إجمالي الصرف:</span>
-            <span className="text-2xl font-black text-blue-400">{totals.totalF.toLocaleString()} <small className="text-[10px]">لتر</small></span>
+          <div className="p-4 bg-gradient-to-r from-blue-950/20 to-transparent rounded-2xl border-t border-blue-800/20 flex justify-between items-center mt-2">
+            <span className="text-xs font-bold text-slate-500">إجمالي صرف الوقود:</span>
+            <span className="text-2xl font-black text-blue-400 shadow-glow-blue-txt">{totals.totalFuel.toLocaleString()}</span>
           </div>
         </section>
 
-        {/* KW Table Section */}
-        <section className="glass-card rounded-[2.5rem] p-5 shadow-3d border border-white/5 space-y-4">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="w-2 h-5 bg-cyan-500 rounded-full shadow-[0_0_10px_#06b6d4]"></span>
-            <h2 className="text-sm font-black text-cyan-400">عدادات الطاقة (kW)</h2>
+        {/* KW Card (بطاقة الطاقة النيون) */}
+        <section className="glass-panel rounded-[2.5rem] p-5 shadow-3d-flat border border-cyan-900/10 space-y-4 group">
+          <div className="flex justify-between items-center mb-1">
+            <div className="flex items-center gap-3">
+              <span className="w-3 h-5 bg-cyan-500 rounded-lg shadow-glow-cyan animate-pulse"></span>
+              <h2 className="text-sm font-black text-cyan-300">إنتاج الطاقة (kW)</h2>
+            </div>
+            <span className="text-[10px] text-slate-600 font-bold">POWER</span>
           </div>
           {kwRows.map((row, idx) => (
-            <div key={idx} className="bg-black/40 p-4 rounded-2xl shadow-inner-3d border border-white/5 flex items-center gap-3">
-              <span className="w-14 font-black text-xs text-slate-400 italic">{row.name}</span>
-              <input type="number" value={row.yesterday} onChange={(e)=>updateValue('kw', idx, 'yesterday', e.target.value)} className="input-field" placeholder="أمس" />
-              <input type="number" value={row.today} onChange={(e)=>updateValue('kw', idx, 'today', e.target.value)} className="input-field-active border-cyan-500/30 text-cyan-400" placeholder="يوم" />
-              <div className="w-14 text-center font-black text-blue-400 text-lg">{totals.kSums[idx] > 0 ? totals.kSums[idx] : 0}</div>
+            <div key={idx} className="bg-[#0c0e14]/50 p-4 rounded-2xl shadow-inner-3d border border-white/5 flex items-center gap-3 transition-all hover:border-cyan-500/30">
+              <span className="w-14 font-black text-xs text-cyan-200 italic">{row.name}</span>
+              <input type="number" value={row.yesterday} onChange={(e)=>updateValue('kw', idx, 'yesterday', e.target.value)} className="input-3d" placeholder="أمس" />
+              <input type="number" value={row.today} onChange={(e)=>updateValue('kw', idx, 'today', e.target.value)} className="input-3d-active border-cyan-500/40 text-cyan-100" placeholder="يوم" />
+              <div className="w-14 text-center font-black text-cyan-400 text-lg group-hover:animate-scale-in">{totals.kSums[idx] > 0 ? totals.kSums[idx] : 0}</div>
             </div>
           ))}
-          <div className="p-4 bg-cyan-600/10 rounded-2xl border border-cyan-500/20 flex justify-between items-center mt-2">
-            <span className="text-xs font-bold text-cyan-200">إجمالي الإنتاج:</span>
-            <span className="text-2xl font-black text-cyan-400">{totals.totalKW.toLocaleString()} <small className="text-[10px]">kW</small></span>
+          <div className="p-4 bg-gradient-to-r from-cyan-950/20 to-transparent rounded-2xl border-t border-cyan-800/20 flex justify-between items-center mt-2">
+            <span className="text-xs font-bold text-slate-500">إجمالي الإنتاج:</span>
+            <span className="text-2xl font-black text-cyan-400 shadow-glow-cyan-txt">{totals.totalKW.toLocaleString()}</span>
           </div>
         </section>
 
-        {/* Storage Section */}
-        <div className="space-y-4">
-          <div className="glass-card p-6 rounded-[2.5rem] shadow-3d border border-white/5">
-            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-2">الخزين الكلي الحالي</label>
+        {/* Remaining (الخزين الصافي - البطاقة الرئيسية) */}
+        <div className="space-y-4 relative overflow-hidden p-6 glass-panel rounded-[3rem] shadow-3d-flat border border-white/5 text-center flex flex-col items-center">
+            {/* Background pattern */}
+            <div className="absolute inset-0 bg-blue-600/5 [mask-image:linear-gradient(180deg,#fff,rgba(255,255,255,0))] opacity-50"></div>
+            
+            <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest block mb-1 z-10">الخزين الكلي في الخزان الرئيسي (لتر)</label>
             <input 
               type="number" 
               value={initialStock} 
               onChange={(e)=>setInitialStock(e.target.value)} 
-              className="w-full bg-black/50 border border-blue-500/20 p-4 rounded-2xl text-3xl font-black text-blue-400 outline-none shadow-inner-3d text-center focus:border-blue-500 transition-all"
+              className="w-full bg-[#0c0e14]/80 border-2 border-blue-500/30 p-5 rounded-2xl text-4xl font-black text-blue-400 outline-none shadow-inner-3d text-center focus:border-blue-500 focus:ring-4 ring-blue-500/10 transition-all z-10"
               placeholder="0"
             />
-          </div>
+            
+            <div className="w-full h-1 bg-black/40 rounded-full mt-6 shadow-inner-3d z-10 overflow-hidden">
+                <div 
+                    className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full transition-all duration-1000 shadow-glow-blue-txt animate-shimmer"
+                    style={{ width: `${Math.min(100, (totals.remaining / 10000) * 100)}%` }}
+                ></div>
+            </div>
 
-          <div className="bg-gradient-to-br from-blue-600 to-blue-800 p-8 rounded-[2.5rem] shadow-3d flex justify-between items-center relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl group-hover:scale-150 transition-transform duration-1000"></div>
-            <div>
-              <p className="text-[10px] font-black text-blue-100 uppercase tracking-widest mb-1">المتبقي الصافي</p>
-              <p className="text-5xl font-black text-white tracking-tighter">{totals.remaining.toLocaleString()}</p>
-            </div>
-            <div className="bg-black/20 p-4 rounded-2xl backdrop-blur-md border border-white/10">
-              <span className="text-2xl">⛽</span>
-            </div>
-          </div>
+            <p className="text-[9px] font-black text-blue-200uppercase tracking-widest mt-6 mb-1 z-10">المتبقي الصافي الآن</p>
+            <p className="text-7xl font-black text-white tracking-tighter drop-shadow-3d animate-text-glow z-10">
+              {totals.remaining.toLocaleString()}
+              <span className="text-xs font-normal text-cyan-400 ml-2 italic">Ltr</span>
+            </p>
         </div>
 
       </div>
 
-      <style jsx global>{`
-        .glass-card { background: rgba(20, 24, 32, 0.8); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); }
-        .shadow-3d { box-shadow: 20px 20px 40px #050608, -5px -5px 15px rgba(255,255,255,0.02); }
-        .shadow-inner-3d { box-shadow: inset 4px 4px 10px #000, inset -2px -2px 5px rgba(255,255,255,0.01); }
-        
-        .btn-3d-blue { background: #2563eb; color: white; box-shadow: 0 4px 0 #1e3a8a, 0 8px 15px rgba(0,0,0,0.4); transition: all 0.1s; }
-        .btn-3d-blue:active { transform: translateY(2px); box-shadow: 0 1px 0 #1e3a8a, 0 4px 8px rgba(0,0,0,0.4); }
+      {/* Footer info (فوتر الاحترافي) */}
+      <footer className="text-center p-8 text-slate-700 text-[10px] font-bold tracking-[0.3em]">
+        DESIGNED FOR EXTREME OPERATIONS • 2026
+      </footer>
 
-        .input-field { width: 100%; background: #000; border: 1px solid #1a1a1a; border-radius: 12px; padding: 10px; text-align: center; font-weight: 700; color: #4b5563; outline: none; box-shadow: inset 2px 2px 5px #000; font-size: 14px; }
-        .input-field-active { width: 100%; background: #000; border: 1px solid rgba(59,130,246,0.3); border-radius: 12px; padding: 10px; text-align: center; font-weight: 900; color: #fff; outline: none; box-shadow: 0 0 10px rgba(59,130,246,0.1); font-size: 14px; transition: all 0.3s; }
-        .input-field-active:focus { border-color: #3b82f6; transform: scale(1.02); }
+      {/* Global CSS for unique animations and effects (جميع التأثيرات والمؤثرات البصرية) */}
+      <style jsx global>{`
+        @keyframes slideDown { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes textGlow { 0%, 100% { filter: drop-shadow(0 0 5px rgba(255,255,255,0.4)); } 50% { filter: drop-shadow(0 0 15px rgba(59,130,246,0.6)); } }
+        @keyframes pulseSlow { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.6; } }
+        @keyframes scaleIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        
+        .animate-slide-down { animation: slideDown 0.8s ease-out; }
+        .animate-text-glow { animation: textGlow 4s infinite ease-in-out; }
+        .animate-pulse-slow { animation: pulseSlow 5s infinite ease-in-out; }
+        .animate-scale-in { animation: scaleIn 0.3s ease-out; }
+        .animate-shimmer { background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%); background-size: 200% 100%; animation: shimmer 2.5s infinite linear; }
+
+        .glass-panel { background: rgba(13, 15, 22, 0.7); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); }
+        .shadow-3d-flat { box-shadow: 20px 20px 40px #040507, -5px -5px 15px rgba(255,255,255,0.01); }
+        .shadow-inner-3d { box-shadow: inset 4px 4px 10px #000, inset -2px -2px 5px rgba(255,255,255,0.01); }
+        .shadow-glow-blue { box-shadow: 0 0 15px rgba(59, 130, 246, 0.6); }
+        .shadow-glow-cyan { box-shadow: 0 0 15px rgba(6, 182, 212, 0.6); }
+        .shadow-glow-blue-txt { filter: drop-shadow(0 0 10px #3b82f6); }
+        .shadow-glow-cyan-txt { filter: drop-shadow(0 0 10px #06b6d4); }
+        .drop-shadow-3d { filter: drop-shadow(5px 5px 3px #000); }
+        
+        .btn-3d-active { background: #050608; border: 1px solid #1c222d; color: #a1a1aa; box-shadow: 4px 4px 8px #040507, -2px -2px 5px #1c222d; transition: all 0.2s; }
+        .btn-3d-active:active { transform: translateY(2px); box-shadow: 1px 1px 2px #040507, -1px -1px 2px #1c222d; color: #fff; border-color: #3f3f46; }
+
+        .input-3d { width: 100%; background: #0a0c10; border: 1px solid #111; border-radius: 10px; padding: 10px; text-align: center; font-weight: 700; color: #3f3f46; outline: none; box-shadow: inset 3px 3px 6px #000; font-size: 14px; }
+        .input-3d-active { width: 100%; background: #0a0c10; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 10px; text-align: center; font-weight: 900; color: #fff; outline: none; box-shadow: 0 0 15px rgba(255,255,255,0.05); font-size: 14px; transition: all 0.3s; }
+        .input-3d-active:focus { border-color: rgba(255,255,255,0.3); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255,255,255,0.1); }
 
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        body { background-color: #0a0b10; }
+        body { background-color: #06070a; }
       `}</style>
     </div>
   );
