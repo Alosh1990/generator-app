@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useMemo } from 'react';
 
-// --- أيقونات هندسية مخصصة ---
+// --- الأيقونات الهندسية ---
 const GeneratorIcon = () => (
   <svg className="w-8 h-8 drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M12 2L2 12V22H22V12L12 2Z" stroke="#3b82f6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -26,64 +26,67 @@ export default function RakbaUltraV3() {
     { id: 2, name: 'CAT 2', yest: '', today: '' },
     { id: 3, name: 'CAT 3', yest: '', today: '' },
   ]);
-  const [kwRows, setKwRows] = useState([
-    { id: 1, name: 'CAT 1', yest: '', today: '' },
-    { id: 2, name: 'CAT 2', yest: '', today: '' },
-    { id: 3, name: 'CAT 3', yest: '', today: '' },
-  ]);
 
   useEffect(() => {
     setMounted(true);
-    const saved = localStorage.getItem('rakba_ultra_final_v1');
+    const saved = localStorage.getItem('rakba_ultra_final_fix');
     if (saved) {
-      const parsed = JSON.parse(saved);
-      if(parsed.s) setStockBefore(parsed.s);
-      if(parsed.fr) setFuelRows(parsed.fr);
-      if(parsed.kr) setKwRows(parsed.kr);
+      try {
+        const parsed = JSON.parse(saved);
+        if(parsed.s) setStockBefore(parsed.s);
+        if(parsed.fr) setFuelRows(parsed.fr);
+      } catch (e) { console.error(e); }
     }
   }, []);
 
   useEffect(() => {
-    if (mounted) localStorage.setItem('rakba_ultra_final_v1', JSON.stringify({ s: stockBefore, fr: fuelRows, kr: kwRows }));
-  }, [stockBefore, fuelRows, kwRows, mounted]);
+    if (mounted) localStorage.setItem('rakba_ultra_final_fix', JSON.stringify({ s: stockBefore, fr: fuelRows }));
+  }, [stockBefore, fuelRows, mounted]);
 
   const stats = useMemo(() => {
     const fDiffs = fuelRows.map(r => Math.max(0, (Number(r.today) || 0) - (Number(r.yest) || 0)));
-    const kDiffs = kwRows.map(r => Math.max(0, (Number(r.today) || 0) - (Number(r.yest) || 0)));
     const totalFuel = fDiffs.reduce((a, b) => a + b, 0);
-    const totalKW = kDiffs.reduce((a, b) => a + b, 0);
-    return { fDiffs, kDiffs, totalFuel, totalKW, current: (Number(stockBefore) || 0) - totalFuel };
-  }, [stockBefore, fuelRows, kwRows]);
+    return { fDiffs, totalFuel, current: (Number(stockBefore) || 0) - totalFuel };
+  }, [stockBefore, fuelRows]);
+
+  const handleMigration = () => {
+    if (window.confirm("هل تريد ترحيل البيانات لليوم الجديد؟")) {
+      const updated = fuelRows.map(r => ({ ...r, yest: r.today, today: '' }));
+      setFuelRows(updated);
+    }
+  };
 
   if (!mounted) return null;
 
   return (
-    <div className="min-h-screen bg-[#05060a] text-white p-4 font-sans selection:bg-blue-500/30 overflow-x-hidden" dir="rtl">
+    <div className="min-h-screen bg-[#05060a] text-white p-4 font-sans overflow-x-hidden" dir="rtl">
       <style jsx global>{`
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 2.5rem; }
-        .neo-input { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; border-radius: 12px; }
+        .neo-input { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; transition: 0.3s; }
         .neo-input:focus { border-color: #3b82f6; box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); outline: none; }
-        .card-3d { transform: perspective(1000px) rotateX(2deg); transition: 0.5s; }
-        .card-3d:hover { transform: perspective(1000px) rotateX(0deg); }
       `}</style>
 
       <div className="max-w-[460px] mx-auto space-y-6 pb-12">
         
-        {/* الهيدر */}
+        {/* Header */}
         <header className="flex justify-between items-center px-2">
           <div>
             <h1 className="text-3xl font-black italic text-blue-500 tracking-tighter">رُكبة <span className="text-white">PRO</span></h1>
-            <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mt-1">Industrial System v3.0</p>
+            <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mt-1">Industrial Dashboard</p>
           </div>
-          <button onClick={() => confirm("ترحيل؟") && (setFuelRows(fuelRows.map(r=>({...r, yest:r.today, today:''}))), setKwRows(kwRows.map(r=>({...r, yest:r.today, today:''})))} className="bg-blue-600 shadow-lg shadow-blue-900/40 text-[10px] px-6 py-2.5 rounded-2xl font-black active:scale-90 transition-all">ترحيل ⏭️</button>
+          <button 
+            onClick={handleMigration} 
+            className="bg-blue-600 shadow-lg shadow-blue-900/40 text-[10px] px-6 py-2.5 rounded-2xl font-black active:scale-90 transition-all"
+          >
+            ترحيل ⏭️
+          </button>
         </header>
 
-        {/* الكارت الزجاجي الرئيسي - المتبقي */}
-        <div className="glass card-3d p-8 shadow-2xl relative overflow-hidden text-center border-t-2 border-white/10">
-          <div className="absolute -top-10 -right-10 w-32 h-32 bg-blue-500/10 blur-[60px] rounded-full"></div>
+        {/* الكارت الرئيسي */}
+        <div className="glass p-8 shadow-2xl relative overflow-hidden text-center border-t-2 border-white/10">
           <p className="text-[10px] font-black text-slate-400 mb-2 tracking-[0.3em]">المتبقي في الخزان (لتر)</p>
-          <div className="text-8xl font-black text-white mb-6 tracking-tighter tabular-nums drop-shadow-[0_5px_15px_rgba(0,0,0,0.5)]">
+          <div className="text-7xl font-black text-white mb-6 tracking-tighter tabular-nums drop-shadow-xl">
             {stats.current.toLocaleString()}
           </div>
           <div className="relative max-w-[280px] mx-auto">
@@ -95,49 +98,54 @@ export default function RakbaUltraV3() {
           </div>
         </div>
 
-        {/* إحصائيات سريعة */}
+        {/* إحصائيات */}
         <div className="grid grid-cols-2 gap-4">
-          <div className="glass p-5 flex flex-col items-center border-r-4 border-emerald-500 shadow-emerald-900/10 shadow-xl">
+          <div className="glass p-5 flex flex-col items-center border-r-4 border-emerald-500 shadow-xl">
             <GasIcon />
-            <p className="text-[9px] text-emerald-500 font-bold mb-1 uppercase">صرف الكاز الكلي</p>
-            <p className="text-3xl font-black tabular-nums">{stats.totalFuel.toLocaleString()}</p>
+            <p className="text-[9px] text-emerald-500 font-bold mb-1 uppercase tracking-widest">إجمالي الصرف</p>
+            <p className="text-3xl font-black tabular-nums text-emerald-400">{stats.totalFuel.toLocaleString()}</p>
           </div>
-          <div className="glass p-5 flex flex-col items-center border-r-4 border-yellow-500 shadow-yellow-900/10 shadow-xl">
+          <div className="glass p-5 flex flex-col items-center border-r-4 border-yellow-500 shadow-xl opacity-80">
             <BoltIcon />
-            <p className="text-[9px] text-yellow-500 font-bold mb-1 uppercase">إنتاج الـ KW الكلي</p>
-            <p className="text-3xl font-black tabular-nums">{stats.totalKW.toLocaleString()}</p>
+            <p className="text-[9px] text-yellow-500 font-bold mb-1 uppercase tracking-widest">الطاقة المستهلكة</p>
+            <p className="text-3xl font-black tabular-nums text-yellow-400">0</p>
           </div>
         </div>
 
-        {/* جداول البيانات الفخمة */}
+        {/* الجداول */}
         <div className="space-y-4 pt-4">
           <h2 className="text-xs font-black text-slate-500 px-3 uppercase tracking-[0.4em] flex items-center gap-2">
-            <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span> عدادات المولدات
+            <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span> عدادات الاستهلاك
           </h2>
           
           {fuelRows.map((row, i) => (
             <div key={row.id} className="glass p-5 flex items-center gap-4 hover:bg-white/5 transition-all group">
-              {/* قسم الأيقونة */}
               <div className="flex flex-col items-center gap-1 border-l border-white/5 pl-4 w-16">
                 <GeneratorIcon />
-                <span className="text-[10px] font-black text-blue-400 italic uppercase tracking-tighter">{row.name}</span>
+                <span className="text-[10px] font-black text-blue-400 italic tracking-tighter">{row.name}</span>
               </div>
               
-              {/* مدخلات البيانات */}
               <div className="flex-1 grid grid-cols-2 gap-2">
-                <div className="flex flex-col gap-1">
-                  <label className="text-[8px] text-slate-600 pr-1">قراءة أمس</label>
-                  <input type="number" value={row.yest} onChange={(e)=>{const n=[...fuelRows]; n[i].yest=e.target.value; setFuelRows(n)}} className="neo-input p-3 text-xs text-slate-400 font-bold" />
+                <div className="flex flex-col gap-1 text-right">
+                  <label className="text-[8px] text-slate-600 pr-1">أمس</label>
+                  <input 
+                    type="number" value={row.yest} 
+                    onChange={(e)=>{const n=[...fuelRows]; n[i].yest=e.target.value; setFuelRows(n)}} 
+                    className="neo-input p-3 text-xs text-slate-400 font-bold" 
+                  />
                 </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-[8px] text-emerald-500 pr-1">قراءة اليوم</label>
-                  <input type="number" value={row.today} onChange={(e)=>{const n=[...fuelRows]; n[i].today=e.target.value; setFuelRows(n)}} className="neo-input p-3 text-xs font-black text-white" />
+                <div className="flex flex-col gap-1 text-right">
+                  <label className="text-[8px] text-emerald-500 pr-1">اليوم</label>
+                  <input 
+                    type="number" value={row.today} 
+                    onChange={(e)=>{const n=[...fuelRows]; n[i].today=e.target.value; setFuelRows(n)}} 
+                    className="neo-input p-3 text-xs font-black text-white" 
+                  />
                 </div>
               </div>
 
-              {/* الصرف الفرعي */}
               <div className="w-14 text-center border-r border-white/5 pr-4 group-hover:border-emerald-500/30 transition-all">
-                <span className="text-[8px] text-emerald-500 font-bold uppercase block mb-1">الفرق</span>
+                <span className="text-[8px] text-emerald-500 font-bold uppercase block mb-1 tracking-tighter">الفرق</span>
                 <span className="text-2xl font-black text-emerald-400 tabular-nums">{stats.fDiffs[i].toLocaleString()}</span>
               </div>
             </div>
