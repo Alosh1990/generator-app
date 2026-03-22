@@ -55,7 +55,7 @@ export default function Page() {
         <div className="bg-[#0b111c]/90 backdrop-blur-xl rounded-3xl p-4 sm:p-6 border border-white/10">
 
           {/* HEADER TABS */}
-          <div className="flex gap-4 mb-6 cursor-pointer">
+          <div className="flex gap-4 mb-6 cursor-pointer flex-wrap">
             <div
               onClick={() => setActiveTab("kwh")}
               className={`flex-1 text-center py-4 rounded-xl border ${
@@ -82,16 +82,21 @@ export default function Page() {
           <div className="rounded-2xl overflow-x-auto border border-cyan-400/20">
             <div className="min-w-[400px]">
 
-              <div className="grid grid-cols-4 text-center text-yellow-300 bg-black/40 py-3">
+              {/* Table Header */}
+              <div className="hidden sm:grid grid-cols-4 text-center text-yellow-300 bg-black/40 py-3">
                 <span>الفئة</span>
                 <span>عداد الأمس</span>
                 <span>عداد اليوم</span>
                 <span>الصرف</span>
               </div>
 
+              {/* Table Rows */}
               {rows.map((r, i) => (
-                <div key={i} className="grid grid-cols-4 text-center py-4 border-t border-white/5">
-                  <span className="text-yellow-200">{r.name}</span>
+                <div
+                  key={i}
+                  className="grid grid-cols-1 sm:grid-cols-4 gap-2 text-center py-4 border-t border-white/5 bg-black/20 sm:bg-transparent rounded-lg sm:rounded-none p-2 sm:p-0"
+                >
+                  <span className="text-yellow-200 font-semibold">{r.name}</span>
                   <input
                     type="number"
                     value={r.y}
@@ -100,7 +105,7 @@ export default function Page() {
                       newRows[i].y = e.target.value;
                       setRows(newRows);
                     }}
-                    className="bg-black/40 rounded p-3 text-center focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                    className="bg-black/40 rounded p-3 text-center focus:outline-none focus:ring-2 focus:ring-cyan-400 w-full sm:w-auto"
                   />
                   <input
                     type="number"
@@ -110,40 +115,41 @@ export default function Page() {
                       newRows[i].t = e.target.value;
                       setRows(newRows);
                     }}
-                    className="bg-black/40 rounded p-3 text-center focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                    className="bg-black/40 rounded p-3 text-center focus:outline-none focus:ring-2 focus:ring-cyan-400 w-full sm:w-auto"
                   />
-                  <span className="text-cyan-400 font-bold text-lg glow">
-                    {stats.diffs[i]}
-                  </span>
+                  <span className="text-cyan-400 font-bold text-lg glow">{stats.diffs[i]}</span>
                 </div>
               ))}
 
-              <div className="flex justify-between px-6 py-4 bg-black/50 text-yellow-300 font-bold text-lg">
+              {/* Total */}
+              <div className="flex flex-col sm:flex-row justify-between px-6 py-4 bg-black/50 text-yellow-300 font-bold text-lg mt-2 rounded-lg sm:rounded-none">
                 <span>المجموع</span>
                 <span>{stats.total.toLocaleString()} {activeTab === "kwh" ? "kWh" : "لتر"}</span>
               </div>
             </div>
           </div>
 
-          {/* STOCK */}
-          <div className="mt-6 p-5 rounded-2xl border border-cyan-400/20 bg-gradient-to-r from-cyan-500/10 to-blue-500/10">
-            <div className="flex justify-between items-center">
-              <span>الخزين قبل:</span>
-              <input
-                type="number"
-                value={stockBefore}
-                onChange={(e) => setStockBefore(e.target.value)}
-                className="bg-black/40 rounded p-3 w-32 text-center focus:ring-2 focus:ring-cyan-400"
-              />
-            </div>
+          {/* STOCK - يظهر فقط عند جدول الكاز */}
+          {activeTab === "gas" && (
+            <div className="mt-6 p-5 rounded-2xl border border-cyan-400/20 bg-gradient-to-r from-cyan-500/10 to-blue-500/10">
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <span>الخزين قبل:</span>
+                  <input
+                    type="number"
+                    value={stockBefore}
+                    onChange={(e) => setStockBefore(e.target.value)}
+                    className="bg-black/40 rounded p-3 w-32 text-center focus:ring-2 focus:ring-cyan-400"
+                  />
+                </div>
 
-            <div className="flex justify-between items-center mt-4">
-              <span>الخزين بعد:</span>
-              <span className="text-emerald-400 text-2xl font-black glow">
-                {stats.current.toLocaleString()}
-              </span>
+                <div className="flex items-center gap-2">
+                  <span>الخزين بعد:</span>
+                  <span className="text-emerald-400 text-2xl font-black glow">{stats.current.toLocaleString()}</span>
+                </div>
+              </div>
             </div>
-          </div>
+          )}
 
         </div>
       </div>
