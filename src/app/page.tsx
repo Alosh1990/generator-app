@@ -1,165 +1,173 @@
 "use client";
 import React, { useState, useEffect, useMemo } from 'react';
 
-export default function GeneratorPerfectMobile() {
+export default function RakbaUltraProFixed() {
   const [mounted, setMounted] = useState(false);
+  const [stockBefore, setStockBefore] = useState(''); 
+  
   const [fuelRows, setFuelRows] = useState([
-    { name: 'CAT 1', yesterday: '', today: '' },
-    { name: 'CAT 2', yesterday: '', today: '' },
-    { name: 'CAT 3', yesterday: '', today: '' },
+    { id: 1, name: 'CAT 1', yest: '', today: '' },
+    { id: 2, name: 'CAT 2', yest: '', today: '' },
+    { id: 3, name: 'CAT 3', yest: '', today: '' },
   ]);
+
   const [kwRows, setKwRows] = useState([
-    { name: 'CAT 1', yesterday: '', today: '' },
-    { name: 'CAT 2', yesterday: '', today: '' },
-    { name: 'CAT 3', yesterday: '', today: '' },
+    { id: 1, name: 'CAT 1', yest: '', today: '' },
+    { id: 2, name: 'CAT 2', yest: '', today: '' },
+    { id: 3, name: 'CAT 3', yest: '', today: '' },
   ]);
-  const [initialStock, setInitialStock] = useState('');
 
   useEffect(() => {
     setMounted(true);
-    const savedFuel = localStorage.getItem('f_final_v10');
-    const savedKW = localStorage.getItem('k_final_v10');
-    const savedStock = localStorage.getItem('s_final_v10');
-    if (savedFuel) setFuelRows(JSON.parse(savedFuel));
-    if (savedKW) setKwRows(JSON.parse(savedKW));
-    if (savedStock) setInitialStock(savedStock);
+    const saved = localStorage.getItem('rakba_ultra_v16');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      setStockBefore(parsed.s || '');
+      setFuelRows(parsed.fr || fuelRows);
+      setKwRows(parsed.kr || kwRows);
+    }
   }, []);
 
   useEffect(() => {
     if (mounted) {
-      localStorage.setItem('f_final_v10', JSON.stringify(fuelRows));
-      localStorage.setItem('k_final_v10', JSON.stringify(kwRows));
-      localStorage.setItem('s_final_v10', initialStock);
+      localStorage.setItem('rakba_ultra_v16', JSON.stringify({ s: stockBefore, fr: fuelRows, kr: kwRows }));
     }
-  }, [fuelRows, kwRows, initialStock, mounted]);
+  }, [stockBefore, fuelRows, kwRows, mounted]);
 
-  const updateValue = (type: 'f' | 'k', i: number, field: 'yesterday' | 'today', v: string) => {
-    const data = type === 'f' ? [...fuelRows] : [...kwRows];
-    data[i][field] = v;
-    type === 'f' ? setFuelRows(data) : setKwRows(data);
+  // --- الحسابات المصلحة لضمان عمل التوتل ---
+  const stats = useMemo(() => {
+    // حساب فروقات الكاز لكل مولدة
+    const fDiffs = fuelRows.map(r => {
+      const diff = (parseFloat(r.today) || 0) - (parseFloat(r.yest) || 0);
+      return diff > 0 ? diff : 0;
+    });
+
+    // حساب فروقات الكيلو واط لكل مولدة
+    const kDiffs = kwRows.map(r => {
+      const diff = (parseFloat(r.today) || 0) - (parseFloat(r.yest) || 0);
+      return diff > 0 ? diff : 0;
+    });
+
+    // المجموع الإجمالي (Total)
+    const totalFuel = fDiffs.reduce((a, b) => a + b, 0);
+    const totalKW = kDiffs.reduce((a, b) => a + b, 0);
+    
+    // الخزين المتبقي
+    const currentStock = (parseFloat(stockBefore) || 0) - totalFuel;
+
+    return { fDiffs, kDiffs, totalFuel, totalKW, currentStock };
+  }, [stockBefore, fuelRows, kwRows]);
+
+  const handleMigrate = () => {
+    if (window.confirm("ترحيل البيانات لليوم الجديد؟")) {
+      setFuelRows(fuelRows.map(r => ({ ...r, yest: r.today, today: '' })));
+      setKwRows(kwRows.map(r => ({ ...r, yest: r.today, today: '' })));
+    }
   };
-
-  const totals = useMemo(() => {
-    const fSums = fuelRows.map(r => (parseFloat(r.today) || 0) - (parseFloat(r.yesterday) || 0));
-    const kSums = kwRows.map(r => (parseFloat(r.today) || 0) - (parseFloat(r.yesterday) || 0));
-    const totalF = fSums.reduce((a, b) => a + (b > 0 ? b : 0), 0);
-    const totalK = kSums.reduce((a, b) => a + (b > 0 ? b : 0), 0);
-    const remaining = (parseFloat(initialStock) || 0) - totalF;
-    return { fSums, kSums, totalF, totalK, remaining: remaining || 0 };
-  }, [fuelRows, kwRows, initialStock]);
 
   if (!mounted) return null;
 
   return (
-    <div className="min-h-screen bg-[#050608] text-white font-sans selection:bg-blue-500/30 overflow-x-hidden flex justify-center" dir="rtl">
-      
-      {/* Container الأساسي - يتوسط في الكمبيوتر ويمرن في الموبايل */}
-      <div className="w-full max-w-[480px] min-h-screen bg-[#090a0f] p-5 md:p-8 space-y-8 shadow-2xl relative border-x border-white/5 pb-20">
+    <div className="min-h-screen bg-[#050608] text-white p-4 flex justify-center font-sans selection:bg-blue-500/30 overflow-x-hidden" dir="rtl">
+      <style jsx global>{`
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-up { animation: slideUp 0.5s ease-out forwards; }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .glass { background: rgba(13, 17, 23, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); }
+        .neo-input { transition: all 0.3s ease; border: 1px solid rgba(255,255,255,0.1); background: black; }
+        .neo-input:focus { border-color: #3b82f6; box-shadow: 0 0 10px rgba(59, 130, 246, 0.2); }
+      `}</style>
+
+      <div className="w-full max-w-[480px] space-y-6 pb-20">
         
-        {/* Header فخم وبسيط */}
-        <header className="flex justify-between items-center pt-2">
+        {/* Header */}
+        <header className="flex justify-between items-center border-b border-white/10 pb-4 animate-up">
           <div>
-            <h1 className="text-3xl font-black bg-gradient-to-l from-blue-400 to-cyan-400 bg-clip-text text-transparent italic tracking-tighter">قمرة القيادة</h1>
-            <p className="text-[9px] text-slate-600 font-bold tracking-[0.2em] uppercase">SYSTEM VERSION 10.0</p>
+            <h1 className="text-4xl font-black text-blue-500 italic tracking-tighter">رُكبة <span className="text-white">PRO</span></h1>
+            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.3em]">Industrial System v16</p>
           </div>
-          <button 
-            onClick={() => confirm("ترحيل البيانات؟") && setFuelRows(fuelRows.map(r=>({...r, yesterday:r.today, today:''})))}
-            className="bg-blue-600/10 border border-blue-500/20 text-blue-400 text-[10px] font-black px-4 py-2 rounded-xl active:scale-95 transition-all"
-          >
-            ترحيل ⏭️
-          </button>
+          <button onClick={handleMigrate} className="bg-blue-600 px-6 py-3 rounded-2xl font-black text-[10px] shadow-lg active:scale-90 transition-all">ترحيل ⏭️</button>
         </header>
 
-        {/* كارت الخزين الرئيسي - كبير جداً وواضح */}
-        <div className="bg-gradient-to-br from-[#12141c] to-[#090a0f] p-8 rounded-[2.5rem] border border-white/5 shadow-3d relative overflow-hidden group">
-          <div className="absolute top-0 left-0 w-32 h-32 bg-blue-600/5 blur-3xl"></div>
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">الخزين المتبقي الصافي (لتر)</p>
-          <div className="flex items-baseline gap-2 mb-6">
-            <span className="text-7xl font-black text-white tracking-tighter tabular-nums drop-shadow-2xl">
-              {totals.remaining.toLocaleString()}
-            </span>
-            <span className="text-blue-500 font-black text-sm italic">Ltr</span>
+        {/* الكارت الرئيسي - المتبقي */}
+        <div className="glass p-8 rounded-[3rem] shadow-2xl text-center animate-up" style={{ animationDelay: '0.1s' }}>
+          <p className="text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">المتبقي حالياً في الخزان</p>
+          <div className="text-8xl font-black text-blue-400 mb-8 tracking-tighter tabular-nums">
+            {stats.currentStock.toLocaleString()}
           </div>
-          <input 
-            type="number" 
-            value={initialStock} 
-            onChange={(e)=>setInitialStock(e.target.value)}
-            placeholder="تحديث الخزين الرئيسي..."
-            className="w-full bg-black/40 border border-white/10 p-5 rounded-2xl text-center text-xl font-black text-blue-400 outline-none focus:border-blue-500/40 transition-all shadow-inner"
-          />
+          <div className="relative pt-2">
+            <label className="text-[9px] font-black text-blue-500 absolute -top-1 right-4 bg-[#0d1117] px-2 uppercase tracking-widest">الخزين قبل الصرف</label>
+            <input 
+              type="number" value={stockBefore} onChange={(e) => setStockBefore(e.target.value)}
+              className="w-full neo-input p-5 rounded-2xl text-center text-2xl font-black text-white outline-none"
+              placeholder="0"
+            />
+          </div>
         </div>
 
-        {/* عدادات الكاز - خطوط واضحة وعريضة */}
-        <section className="space-y-4">
-          <h2 className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] px-2 flex justify-between">
-            <span>⛽ استهلاك الكاز</span>
-            <span className="text-emerald-400">+{totals.totalF}</span>
-          </h2>
-          {fuelRows.map((row, idx) => (
-            <div key={idx} className="bg-[#11131a] p-5 rounded-[2rem] border border-white/5 flex items-center gap-3 shadow-3d transition-all active:bg-[#1a1d29]">
-              <span className="w-14 font-black text-[10px] text-blue-300 italic uppercase">{row.name}</span>
-              <input type="number" value={row.yesterday} onChange={(e)=>updateValue('f', idx, 'yesterday', e.target.value)} className="ios-input" placeholder="أمس" />
-              <input type="number" value={row.today} onChange={(e)=>updateValue('f', idx, 'today', e.target.value)} className="ios-input-active" placeholder="يوم" />
-              <div className="w-20 text-center font-black text-2xl text-emerald-400 drop-shadow-glow">
-                {totals.fSums[idx] > 0 ? totals.fSums[idx] : 0}
+        {/* جداول المحاسبة */}
+        <div className="space-y-10 animate-up" style={{ animationDelay: '0.2s' }}>
+          
+          {/* الكاز */}
+          <div className="space-y-4">
+            <h2 className="text-sm font-black text-emerald-400 px-2 uppercase tracking-widest">⛽ جدول استهلاك الكاز</h2>
+            {fuelRows.map((row, i) => (
+              <div key={row.id} className="glass p-4 rounded-[2rem] flex items-center gap-3">
+                <span className="w-12 text-[10px] font-black text-slate-500 italic uppercase">{row.name}</span>
+                <input type="number" placeholder="أمس" value={row.yest} onChange={(e) => { const n = [...fuelRows]; n[i].yest = e.target.value; setFuelRows(n); }} className="w-full neo-input p-3 rounded-xl text-center text-sm outline-none tabular-nums text-slate-400" />
+                <input type="number" placeholder="يوم" value={row.today} onChange={(e) => { const n = [...fuelRows]; n[i].today = e.target.value; setFuelRows(n); }} className="w-full neo-input p-3 rounded-xl text-center text-sm font-black text-white outline-none tabular-nums" />
+                <div className="w-20 text-center font-black text-emerald-400 text-2xl tabular-nums">{stats.fDiffs[i].toLocaleString()}</div>
               </div>
-            </div>
-          ))}
-        </section>
+            ))}
+          </div>
 
-        {/* عدادات الطاقة - تناسق ألوان */}
-        <section className="space-y-4">
-          <h2 className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] px-2 flex justify-between">
-            <span>⚡ إنتاج الطاقة</span>
-            <span className="text-purple-400">+{totals.totalK}</span>
-          </h2>
-          {kwRows.map((row, idx) => (
-            <div key={idx} className="bg-[#11131a] p-5 rounded-[2rem] border border-white/5 flex items-center gap-3 shadow-3d transition-all active:bg-[#1a1d29]">
-              <span className="w-14 font-black text-[10px] text-purple-300 italic uppercase">{row.name}</span>
-              <input type="number" value={row.yesterday} onChange={(e)=>updateValue('k', idx, 'yesterday', e.target.value)} className="ios-input" placeholder="أمس" />
-              <input type="number" value={row.today} onChange={(e)=>updateValue('k', idx, 'today', e.target.value)} className="ios-input-active !border-purple-500/20" placeholder="يوم" />
-              <div className="w-20 text-center font-black text-2xl text-blue-400 drop-shadow-glow">
-                {totals.kSums[idx] > 0 ? totals.kSums[idx] : 0}
+          {/* الكيلو واط */}
+          <div className="space-y-4">
+            <h2 className="text-sm font-black text-blue-400 px-2 uppercase tracking-widest">⚡ جدول الكيلو واط</h2>
+            {kwRows.map((row, i) => (
+              <div key={row.id} className="glass p-4 rounded-[2rem] flex items-center gap-3">
+                <span className="w-12 text-[10px] font-black text-slate-500 italic uppercase">{row.name}</span>
+                <input type="number" placeholder="أمس" value={row.yest} onChange={(e) => { const n = [...kwRows]; n[i].yest = e.target.value; setKwRows(n); }} className="w-full neo-input p-3 rounded-xl text-center text-sm outline-none tabular-nums text-slate-400" />
+                <input type="number" placeholder="يوم" value={row.today} onChange={(e) => { const n = [...kwRows]; n[i].today = e.target.value; setKwRows(n); }} className="w-full neo-input p-3 rounded-xl text-center text-sm font-black text-white outline-none tabular-nums" />
+                <div className="w-20 text-center font-black text-blue-400 text-2xl tabular-nums">{stats.kDiffs[i].toLocaleString()}</div>
               </div>
-            </div>
-          ))}
-        </section>
+            ))}
+          </div>
+        </div>
 
-        <footer className="text-center pt-10 opacity-20 text-[9px] font-bold tracking-[0.4em]">
-          SECURE INTERFACE • 2026
-        </footer>
+        {/* ملخص الـ TOTAL (المصلح) */}
+        <div className="glass rounded-[2.5rem] p-6 border-t-4 border-blue-500/30 animate-up shadow-2xl" style={{ animationDelay: '0.3s' }}>
+          <h3 className="text-center text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-6">الإحصائيات الإجمالية (TOTAL)</h3>
+          
+          <div className="grid grid-cols-2 gap-4">
+            {/* توتل الكاز */}
+            <div className="bg-emerald-500/10 border border-emerald-500/20 p-6 rounded-[2rem] text-center">
+              <p className="text-[9px] font-bold text-emerald-500 uppercase mb-2">إجمالي صرف الكاز</p>
+              <p className="text-4xl font-black text-emerald-400 tabular-nums">
+                {stats.totalFuel.toLocaleString()}
+                <span className="text-xs ml-1 opacity-50">L</span>
+              </p>
+            </div>
+
+            {/* توتل الكيلو واط */}
+            <div className="bg-blue-500/10 border border-blue-500/20 p-6 rounded-[2rem] text-center">
+              <p className="text-[9px] font-bold text-blue-500 uppercase mb-2">إجمالي الكيلو واط</p>
+              <p className="text-4xl font-black text-blue-400 tabular-nums">
+                {stats.totalKW.toLocaleString()}
+                <span className="text-xs ml-1 opacity-50">K</span>
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-6 bg-black/40 p-4 rounded-2xl flex justify-between items-center px-6 border border-white/5">
+            <span className="text-[10px] font-black text-slate-500 uppercase italic">معدل الإنتاج</span>
+            <span className="text-lg font-black text-white tabular-nums italic">
+              {(stats.totalKW / (stats.totalFuel || 1)).toFixed(2)} <span className="text-[10px] text-blue-400">KW/L</span>
+            </span>
+          </div>
+        </div>
+
       </div>
-
-      <style jsx global>{`
-        body { background-color: #050608; margin: 0; padding: 0; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .shadow-3d { box-shadow: 10px 10px 30px rgba(0,0,0,0.5), -5px -5px 15px rgba(255,255,255,0.02); }
-        .drop-shadow-glow { filter: drop-shadow(0 0 8px currentColor); }
-
-        .ios-input { 
-          width: 100%; background: #000; border: 1px solid #1a1b23; border-radius: 14px; 
-          padding: 12px; text-align: center; font-size: 16px; color: #444; outline: none; 
-          box-shadow: inset 2px 2px 5px #000;
-        }
-        
-        .ios-input-active { 
-          width: 100%; background: #000; border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; 
-          padding: 12px; text-align: center; font-size: 16px; color: #fff; font-weight: 900; 
-          outline: none; transition: all 0.3s; box-shadow: inset 2px 2px 5px #000;
-        }
-        
-        .ios-input-active:focus { 
-          border-color: #3b82f6; background: #0d0e12; transform: scale(1.05); 
-          box-shadow: 0 0 15px rgba(59,130,246,0.2); 
-        }
-
-        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        
-        /* ضبط حجم الخط تلقائياً للموبايل لمنع الـ Zoom */
-        @media screen and (max-width: 768px) {
-          input { font-size: 16px !important; }
-        }
-      `}</style>
     </div>
   );
 }
