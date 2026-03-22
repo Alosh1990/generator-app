@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useMemo } from 'react';
 
-export default function GeneratorFinalSystem() {
+export default function Generator3DPro() {
   const [mounted, setMounted] = useState(false);
 
   const [fuelRows, setFuelRows] = useState([
@@ -20,9 +20,9 @@ export default function GeneratorFinalSystem() {
 
   useEffect(() => {
     setMounted(true);
-    const savedFuel = localStorage.getItem('fuelData');
-    const savedKW = localStorage.getItem('kwData');
-    const savedStock = localStorage.getItem('fuelStock');
+    const savedFuel = localStorage.getItem('fuelData_v3');
+    const savedKW = localStorage.getItem('kwData_v3');
+    const savedStock = localStorage.getItem('fuelStock_v3');
     if (savedFuel) setFuelRows(JSON.parse(savedFuel));
     if (savedKW) setKwRows(JSON.parse(savedKW));
     if (savedStock) setInitialStock(savedStock);
@@ -30,9 +30,9 @@ export default function GeneratorFinalSystem() {
 
   useEffect(() => {
     if (mounted) {
-      localStorage.setItem('fuelData', JSON.stringify(fuelRows));
-      localStorage.setItem('kwData', JSON.stringify(kwRows));
-      localStorage.setItem('fuelStock', initialStock);
+      localStorage.setItem('fuelData_v3', JSON.stringify(fuelRows));
+      localStorage.setItem('kwData_v3', JSON.stringify(kwRows));
+      localStorage.setItem('fuelStock_v3', initialStock);
     }
   }, [fuelRows, kwRows, initialStock, mounted]);
 
@@ -49,7 +49,7 @@ export default function GeneratorFinalSystem() {
   };
 
   const moveToTomorrow = () => {
-    if (confirm("هل تريد ترحيل أرقام اليوم لتصبح أرقام الأمس؟")) {
+    if (confirm("سيتم ترحيل البيانات وتصفير عدادات اليوم.. هل أنت متأكد؟")) {
       const newInitialStock = totals.remaining.toString();
       setFuelRows(fuelRows.map(r => ({ ...r, yesterday: r.today, today: '' })));
       setKwRows(kwRows.map(r => ({ ...r, yesterday: r.today, today: '' })));
@@ -69,104 +69,169 @@ export default function GeneratorFinalSystem() {
   if (!mounted) return null;
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white p-4 md:p-8 font-sans" dir="rtl">
-      <div className="max-w-5xl mx-auto space-y-8 text-right">
+    <div className="min-h-screen bg-[#0a0c10] text-slate-200 p-4 md:p-8 font-sans overflow-x-hidden" dir="rtl">
+      {/* Background Decorative Elements */}
+      <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/10 blur-[120px] rounded-full pointer-events-none"></div>
+      <div className="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-600/10 blur-[120px] rounded-full pointer-events-none"></div>
+
+      <div className="max-w-4xl mx-auto space-y-10 relative z-10">
         
-        <div className="flex justify-between items-center border-b border-white/10 pb-6 flex-wrap gap-4">
-          <h1 className="text-2xl font-black text-blue-500 underline decoration-blue-900 underline-offset-8">نظام العدادات الاحترافي</h1>
-          <button onClick={moveToTomorrow} className="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2 rounded-2xl font-bold transition-all shadow-lg shadow-emerald-900/20 active:scale-95 text-sm">
-            ترحيل البيانات للغد ⏭️
+        {/* Header 3D Section */}
+        <div className="flex justify-between items-center p-6 bg-[#141820] rounded-[2rem] shadow-[10px_10px_20px_#050608,-5px_-5px_15px_#1c222d] border border-white/5">
+          <div>
+            <h1 className="text-3xl font-black bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">نظام الإدارة الذكي</h1>
+            <p className="text-[10px] text-slate-500 tracking-[0.2em] font-bold mt-1">GENERATOR MANAGEMENT SYSTEM v3.0</p>
+          </div>
+          <button 
+            onClick={moveToTomorrow}
+            className="relative group overflow-hidden bg-[#1a1f29] px-6 py-3 rounded-2xl font-black text-xs text-emerald-400 shadow-[5px_5px_10px_#050608,-2px_-2px_8px_#232b38] border border-emerald-500/20 active:shadow-inner active:scale-95 transition-all"
+          >
+            ترحيل البيانات ⏭️
           </button>
         </div>
 
-        {/* جدول الكاز */}
-        <div className="bg-[#111] rounded-3xl border border-white/5 overflow-hidden shadow-2xl">
-          <div className="p-4 bg-blue-600/10 text-blue-400 font-bold border-b border-white/5">📋 جدول صرف الكاز (لتر)</div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-center min-w-[400px]">
-              <thead className="bg-white/5 text-slate-500 text-xs">
-                <tr>
-                  <th className="p-4">CAT (كتر)</th>
-                  <th className="p-4">عداد الأمس</th>
-                  <th className="p-4 text-blue-400">عداد اليوم</th>
-                  <th className="p-4 text-emerald-400">الصرف</th>
+        {/* 3D Fuel Card */}
+        <div className="bg-[#141820] rounded-[2.5rem] shadow-[20px_20px_40px_#050608,-10px_-10px_30px_#1c222d] border border-white/5 overflow-hidden">
+          <div className="p-6 border-b border-white/5 bg-gradient-to-l from-blue-500/10 to-transparent">
+            <h2 className="text-lg font-black text-blue-400 flex items-center gap-2">
+              <span className="w-2 h-6 bg-blue-500 rounded-full inline-block"></span>
+              مراقبة صرف الكاز (Ltr)
+            </h2>
+          </div>
+          <div className="p-4 overflow-x-auto">
+            <table className="w-full border-separate border-spacing-y-3">
+              <thead>
+                <tr className="text-slate-500 text-[10px] uppercase tracking-widest">
+                  <th className="p-2">المولد</th>
+                  <th className="p-2">القراءة السابقة</th>
+                  <th className="p-2">القراءة الحالية</th>
+                  <th className="p-2">صافي الصرف</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5 font-bold">
+              <tbody>
                 {fuelRows.map((row, idx) => (
-                  <tr key={idx}>
-                    <td className="p-4 text-slate-300 font-black">{row.name}</td>
-                    <td className="p-4"><input type="number" value={row.yesterday} onChange={(e)=>updateValue('fuel', idx, 'yesterday', e.target.value)} className="input-field" placeholder="0" /></td>
-                    <td className="p-4"><input type="number" value={row.today} onChange={(e)=>updateValue('fuel', idx, 'today', e.target.value)} className="input-field border-blue-500/30" placeholder="0" /></td>
-                    <td className="p-4 text-xl text-emerald-400">{totals.fuelSums[idx] > 0 ? totals.fuelSums[idx].toLocaleString() : 0}</td>
+                  <tr key={idx} className="group">
+                    <td className="p-4 bg-[#0a0c10]/50 rounded-r-2xl font-black text-slate-400 border-y border-r border-white/5">{row.name}</td>
+                    <td className="p-2 bg-[#0a0c10]/50 border-y border-white/5">
+                      <input type="number" value={row.yesterday} onChange={(e)=>updateValue('fuel', idx, 'yesterday', e.target.value)} className="input-3d" placeholder="0" />
+                    </td>
+                    <td className="p-2 bg-[#0a0c10]/50 border-y border-white/5">
+                      <input type="number" value={row.today} onChange={(e)=>updateValue('fuel', idx, 'today', e.target.value)} className="input-3d-active" placeholder="0" />
+                    </td>
+                    <td className="p-4 bg-[#0a0c10]/80 rounded-l-2xl border-y border-l border-white/5 text-center font-black text-xl text-emerald-400">
+                      {totals.fuelSums[idx] > 0 ? totals.fuelSums[idx].toLocaleString() : 0}
+                    </td>
                   </tr>
                 ))}
-                <tr className="bg-white/5 font-black text-xl border-t-2 border-white/10">
-                  <td colSpan={3} className="p-5 text-left pr-10 text-slate-400">إجمالي صرف الكاز:</td>
-                  <td className="p-5 text-emerald-500">{totals.totalFuel.toLocaleString()} لتر</td>
-                </tr>
               </tbody>
             </table>
           </div>
+          <div className="p-6 bg-blue-500/5 flex justify-between items-center border-t border-white/5">
+            <span className="font-bold text-slate-400">المجموع الكلي:</span>
+            <span className="text-3xl font-black text-blue-400 drop-shadow-[0_0_10px_rgba(59,130,246,0.3)]">{totals.totalFuel.toLocaleString()} <small className="text-xs">لتر</small></span>
+          </div>
         </div>
 
-        {/* جدول الكيلو واط */}
-        <div className="bg-[#111] rounded-3xl border border-white/5 overflow-hidden shadow-2xl">
-          <div className="p-4 bg-emerald-600/10 text-emerald-400 font-bold border-b border-white/5">⚡ جدول صرف الكيلو واط (kW)</div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-center min-w-[400px]">
-              <thead className="bg-white/5 text-slate-500 text-xs">
-                <tr>
-                  <th className="p-4">CAT (كتر)</th>
-                  <th className="p-4">عداد الأمس</th>
-                  <th className="p-4 text-emerald-400">عداد اليوم</th>
-                  <th className="p-4 text-blue-400">الصرف</th>
+        {/* 3D KW Card */}
+        <div className="bg-[#141820] rounded-[2.5rem] shadow-[20px_20px_40px_#050608,-10px_-10px_30px_#1c222d] border border-white/5 overflow-hidden">
+          <div className="p-6 border-b border-white/5 bg-gradient-to-l from-emerald-500/10 to-transparent">
+            <h2 className="text-lg font-black text-emerald-400 flex items-center gap-2">
+              <span className="w-2 h-6 bg-emerald-500 rounded-full inline-block"></span>
+              إنتاج الطاقة (kW)
+            </h2>
+          </div>
+          <div className="p-4 overflow-x-auto">
+            <table className="w-full border-separate border-spacing-y-3">
+              <thead>
+                <tr className="text-slate-500 text-[10px] uppercase tracking-widest">
+                  <th className="p-2">المولد</th>
+                  <th className="p-2">القراءة السابقة</th>
+                  <th className="p-2">القراءة الحالية</th>
+                  <th className="p-2">صافي الإنتاج</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5 font-bold">
+              <tbody>
                 {kwRows.map((row, idx) => (
                   <tr key={idx}>
-                    <td className="p-4 text-slate-300 font-black">{row.name}</td>
-                    <td className="p-4"><input type="number" value={row.yesterday} onChange={(e)=>updateValue('kw', idx, 'yesterday', e.target.value)} className="input-field" placeholder="0" /></td>
-                    <td className="p-4"><input type="number" value={row.today} onChange={(e)=>updateValue('kw', idx, 'today', e.target.value)} className="input-field border-emerald-500/30" placeholder="0" /></td>
-                    <td className="p-4 text-xl text-blue-400">{totals.kwSums[idx] > 0 ? totals.kwSums[idx].toLocaleString() : 0}</td>
+                    <td className="p-4 bg-[#0a0c10]/50 rounded-r-2xl font-black text-slate-400 border-y border-r border-white/5">{row.name}</td>
+                    <td className="p-2 bg-[#0a0c10]/50 border-y border-white/5">
+                      <input type="number" value={row.yesterday} onChange={(e)=>updateValue('kw', idx, 'yesterday', e.target.value)} className="input-3d" placeholder="0" />
+                    </td>
+                    <td className="p-2 bg-[#0a0c10]/50 border-y border-white/5">
+                      <input type="number" value={row.today} onChange={(e)=>updateValue('kw', idx, 'today', e.target.value)} className="input-3d-active border-emerald-500/30 text-emerald-400" placeholder="0" />
+                    </td>
+                    <td className="p-4 bg-[#0a0c10]/80 rounded-l-2xl border-y border-l border-white/5 text-center font-black text-xl text-blue-400">
+                      {totals.kwSums[idx] > 0 ? totals.kwSums[idx].toLocaleString() : 0}
+                    </td>
                   </tr>
                 ))}
-                <tr className="bg-white/5 font-black text-xl border-t-2 border-white/10">
-                  <td colSpan={3} className="p-5 text-left pr-10 text-slate-400">إجمالي صرف الطاقة:</td>
-                  <td className="p-5 text-blue-500">{totals.totalKW.toLocaleString()} kW</td>
-                </tr>
               </tbody>
             </table>
           </div>
+          <div className="p-6 bg-emerald-500/5 flex justify-between items-center border-t border-white/5">
+            <span className="font-bold text-slate-400">إجمالي الطاقة:</span>
+            <span className="text-3xl font-black text-emerald-400 drop-shadow-[0_0_10px_rgba(16,185,129,0.3)]">{totals.totalKW.toLocaleString()} <small className="text-xs">kW</small></span>
+          </div>
         </div>
 
-        {/* المخزون */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-          <div className="bg-[#111] p-8 rounded-[2.5rem] border border-white/5 space-y-3 shadow-xl">
-            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mr-2">خزين الكاز المتوفر (لتر)</span>
-            <input type="number" value={initialStock} onChange={(e)=>setInitialStock(e.target.value)} className="w-full bg-black border border-blue-500/30 p-5 rounded-2xl text-3xl font-black text-blue-400 outline-none focus:border-blue-500" placeholder="0" />
+        {/* Footer 3D Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-12">
+          <div className="bg-[#141820] p-8 rounded-[2.5rem] shadow-[15px_15px_30px_#050608,-8px_-8px_20px_#1c222d] border border-white/5 group">
+            <span className="text-xs font-black text-slate-500 uppercase tracking-tighter mb-4 block">الخزين الاحتياطي المتوفر</span>
+            <input 
+              type="number" 
+              value={initialStock} 
+              onChange={(e)=>setInitialStock(e.target.value)} 
+              className="w-full bg-[#0a0c10] shadow-inner border border-white/5 p-6 rounded-[1.5rem] text-4xl font-black text-blue-400 outline-none focus:ring-2 ring-blue-500/20 transition-all text-center" 
+              placeholder="0" 
+            />
           </div>
-          <div className="bg-blue-600 p-8 rounded-[2.5rem] text-center shadow-2xl shadow-blue-900/20">
-            <p className="text-xs font-bold text-blue-200 mb-2">المتبقي الصافي في الخزان</p>
-            <p className="text-5xl font-black">{totals.remaining.toLocaleString()} <span className="text-sm font-normal opacity-70">لتر</span></p>
+          
+          <div className="bg-gradient-to-br from-blue-600 to-blue-800 p-8 rounded-[2.5rem] shadow-[20px_20px_40px_rgba(0,0,0,0.4),inset_-5px_-5px_15px_rgba(0,0,0,0.2)] flex flex-col justify-center items-center relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-1000"></div>
+            <p className="text-blue-100 font-bold text-sm mb-2 opacity-80">صافي الوقود المتبقي</p>
+            <p className="text-6xl font-black text-white tracking-tighter">
+              {totals.remaining.toLocaleString()}
+              <span className="text-sm font-light ml-2 opacity-60">Ltr</span>
+            </p>
+            <div className="mt-4 w-full h-2 bg-black/20 rounded-full overflow-hidden">
+               <div className="h-full bg-white/40 shadow-[0_0_10px_white]" style={{width: '70%'}}></div>
+            </div>
           </div>
         </div>
       </div>
 
       <style jsx>{`
-        .input-field {
+        .input-3d {
           width: 100%;
-          background: #000;
-          border: 1px solid #222;
-          padding: 10px;
-          border-radius: 12px;
+          background: #0d1117;
+          border: 1px solid #1c222d;
+          padding: 12px;
+          border-radius: 15px;
           text-align: center;
-          font-weight: 800;
-          color: white;
+          font-weight: 700;
+          color: #64748b;
+          box-shadow: inset 4px 4px 8px #050608, inset -2px -2px 5px #1c222d;
           outline: none;
+          transition: all 0.3s;
         }
-        .input-field:focus { border-color: #3b82f6; }
+        .input-3d-active {
+          width: 100%;
+          background: #0d1117;
+          border: 1px solid rgba(59,130,246,0.3);
+          padding: 12px;
+          border-radius: 15px;
+          text-align: center;
+          font-weight: 900;
+          color: #3b82f6;
+          box-shadow: 4px 4px 10px #050608, -2px -2px 8px #1c222d;
+          outline: none;
+          transition: all 0.3s;
+        }
+        .input-3d-active:focus {
+          transform: translateY(-2px);
+          box-shadow: 6px 6px 15px #050608, -2px -2px 10px #1c222d;
+        }
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
       `}</style>
     </div>
