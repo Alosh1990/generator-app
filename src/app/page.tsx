@@ -107,83 +107,84 @@ export default function Page() {
         backgroundAttachment: "fixed",
       }}
     >
-      <div className="w-full min-h-screen bg-black/40 flex flex-col items-center p-4 sm:p-6">
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-cyan-300 text-center mb-6">
-          ⚡ محطة الكهرباء الإسبانية 🇪🇸
-        </h1>
+      {/* Overlay داكن لتوضيح النصوص */}
+      <div className="w-full min-h-screen bg-black/50 flex flex-col items-center p-6">
 
+        <h1 className="text-5xl font-extrabold mb-6 text-cyan-300">⚡ محطة الكهرباء الإسبانية 🇪🇸</h1>
+
+        {/* التاريخ */}
         <input
           type="date"
           value={currentDate}
           onChange={e => setCurrentDate(e.target.value)}
-          className="mb-4 p-3 rounded-lg bg-white text-black shadow-lg text-lg w-full max-w-xs"
+          className="mb-4 p-3 rounded-lg bg-white text-black shadow-lg text-lg"
         />
 
         {/* Tabs */}
-        <div className="flex gap-4 mb-6 text-lg flex-wrap justify-center">
+        <div className="flex gap-4 mb-6 text-lg">
           <button
             onClick={() => setActiveTab("kwh")}
-            className={`px-6 py-3 rounded-lg font-bold transition ${
+            className={`px-8 py-3 rounded-lg font-bold transition ${
               activeTab === "kwh" ? "bg-cyan-500 text-black shadow-lg" : "bg-white/20 text-white hover:bg-white/30"
             }`}
           >⚡ كهرباء</button>
           <button
             onClick={() => setActiveTab("gas")}
-            className={`px-6 py-3 rounded-lg font-bold transition ${
+            className={`px-8 py-3 rounded-lg font-bold transition ${
               activeTab === "gas" ? "bg-orange-500 text-black shadow-lg" : "bg-white/20 text-white hover:bg-white/30"
             }`}
           >🔥 كاز</button>
         </div>
 
         {/* Table */}
-        <div id="pdfTable" className="w-full max-w-lg bg-black/70 p-4 sm:p-6 rounded-xl shadow-xl">
+        <div id="pdfTable" className="w-full max-w-xl bg-black/70 p-6 rounded-xl shadow-xl">
           {rows.map((r, i) => (
-            <div key={i} className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-3 p-3 bg-black/50 rounded-lg shadow-md border border-cyan-300">
-              <span className="text-purple-200 font-extrabold text-lg sm:text-xl">{r.name}</span>
+            <div key={i} className="flex items-center justify-between gap-3 mb-3 p-4 bg-black/40 rounded-lg shadow-md border border-cyan-300 transition-all hover:scale-105">
+              <span className="text-purple-200 font-extrabold text-xl">{r.name}</span>
               <input type="number" placeholder="أمس" value={r.y}
                 onChange={e => { const newRows = [...rows]; newRows[i].y = e.target.value; setRows(newRows); }}
-                className="w-full sm:w-1/4 p-3 rounded-lg bg-white text-black font-bold text-center text-lg"
+                className="w-1/4 p-3 rounded-lg bg-white text-black font-bold text-center text-lg"
               />
               <input type="number" placeholder="اليوم" value={r.t}
                 onChange={e => { const newRows = [...rows]; newRows[i].t = e.target.value; setRows(newRows); }}
-                className="w-full sm:w-1/4 p-3 rounded-lg bg-white text-black font-bold text-center text-lg"
+                className="w-1/4 p-3 rounded-lg bg-white text-black font-bold text-center text-lg"
               />
-              <span className="text-yellow-300 font-extrabold text-2xl text-center w-full sm:w-20">{stats.diffs[i]}</span>
+              <span className="text-yellow-300 font-extrabold text-2xl text-center w-20">{stats.diffs[i]}</span>
             </div>
           ))}
-          <div className="mt-4 font-extrabold text-2xl sm:text-3xl text-green-300 text-center border-t border-cyan-400 pt-3">{`المجموع: ${stats.total}`}</div>
+          <div className="mt-4 font-extrabold text-3xl text-green-300 text-center border-t border-cyan-400 pt-3">{`المجموع: ${stats.total}`}</div>
         </div>
 
         {/* الخزين للكاز */}
         {activeTab === "gas" && (
-          <div className="mt-6 w-full max-w-lg p-4 sm:p-6 rounded-xl bg-orange-500/25 border border-orange-300 shadow-lg">
+          <div className="mt-6 w-full max-w-xl p-5 rounded-xl bg-orange-500/25 border border-orange-300 shadow-lg">
             <div className="flex justify-between mb-3">
-              <span className="font-bold text-purple-200 text-lg sm:text-xl">الخزين قبل:</span>
+              <span className="font-bold text-purple-200 text-lg">الخزين قبل:</span>
               <input type="number" value={stockBeforeGas} onChange={e => setStockBeforeGas(e.target.value)}
-                className="p-3 w-32 rounded-lg bg-white text-black font-bold text-center text-lg sm:text-xl"
+                className="p-3 w-32 rounded-lg bg-white text-black font-bold text-center text-lg"
               />
             </div>
             <div className="flex justify-between">
-              <span className="font-bold text-purple-200 text-lg sm:text-xl">الخزين بعد:</span>
-              <span className="text-green-300 font-extrabold text-2xl sm:text-3xl">{statsGas.current}</span>
+              <span className="font-bold text-purple-200 text-lg">الخزين بعد:</span>
+              <span className="text-green-300 font-extrabold text-2xl">{statsGas.current}</span>
             </div>
           </div>
         )}
 
         {/* Buttons */}
-        <div className="flex gap-4 mt-6 flex-wrap justify-center">
-          <button onClick={saveRecord} className="bg-cyan-500 px-6 py-3 rounded-lg font-bold hover:scale-105 transition text-black">💾 حفظ</button>
-          <button onClick={exportPDF} className="bg-blue-500 px-6 py-3 rounded-lg font-bold hover:scale-105 transition text-black">📄 PDF</button>
-          <button onClick={exportCSV} className="bg-green-500 px-6 py-3 rounded-lg font-bold hover:scale-105 transition text-black">📥 CSV</button>
+        <div className="flex gap-4 mt-6">
+          <button onClick={saveRecord} className="bg-cyan-500 px-8 py-3 rounded-lg font-bold hover:scale-105 transition text-black">💾 حفظ</button>
+          <button onClick={exportPDF} className="bg-blue-500 px-8 py-3 rounded-lg font-bold hover:scale-105 transition text-black">📄 PDF</button>
+          <button onClick={exportCSV} className="bg-green-500 px-8 py-3 rounded-lg font-bold hover:scale-105 transition text-black">📥 CSV</button>
         </div>
 
         {/* Records */}
-        <div className="mt-6 w-full max-w-lg">
-          <h2 className="font-bold text-xl sm:text-2xl text-cyan-300 mb-3">سجلات التاريخ:</h2>
+        <div className="mt-6 w-full max-w-xl">
+          <h2 className="font-bold text-xl text-cyan-300 mb-3">سجلات التاريخ:</h2>
           <ul className="list-disc list-inside text-white">
             {records.map((rec, i) => (
               <li key={i} className="flex justify-between items-center mb-2 p-2 bg-black/30 rounded-lg transition-all hover:bg-black/50">
-                <span className="text-lg sm:text-xl">{rec.date} - {rec.type} - {rec.total}</span>
+                <span className="text-lg">{rec.date} - {rec.type} - {rec.total}</span>
                 <button onClick={() => deleteRecord(i)} className="bg-red-500 px-3 py-1 rounded text-white hover:bg-red-600 transition">🗑️</button>
               </li>
             ))}
@@ -191,7 +192,7 @@ export default function Page() {
         </div>
 
         {/* Chart */}
-        <div className="w-full max-w-lg mt-8">
+        <div className="w-full max-w-xl mt-8">
           <Line data={chartData} />
         </div>
 
